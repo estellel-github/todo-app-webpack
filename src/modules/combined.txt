@@ -1,0 +1,240 @@
+--------------------------
+Path: LocalStorage.js
+
+function storeToLocal(allProjects) {
+  const taskCatalogJson = JSON.stringify(allProjects);
+  localStorage.setItem("taskCatalog", taskCatalogJson);
+}
+
+function retrieveLocalCatalog() {
+  const storedCatalogJson = localStorage.getItem("taskCatalog");
+  if (storedCatalogJson && storedCatalogJson.length != 0) {
+    tempCatalog = JSON.parse(storedCatalogJson);
+
+    })
+    displayBookList();
+  } else {
+    console.log("No books found in Local Storage.");
+  }
+}
+--------------------------
+Path: Project.js
+
+import { startOfWeek, endOfWeek, isWithinInterval } from 'date-fns';
+
+class Project {
+  constructor(id, name) {
+    this._id = id;
+    this._name = name;
+    this._tasks = [];
+  }
+
+  get id() {
+    return this._id;
+  }
+
+  set id(projectId) {
+    this._id = projectId;
+  }
+
+  get name() {
+    return this._name;
+  }
+
+  set name(value) {
+    this._name = value;
+  }
+
+  get tasks() {
+    return this._tasks;
+  }
+
+  set tasks(tasks) {
+    this._tasks = tasks;
+  }
+
+  addTask(task) {
+    task.id = this._tasks.length + 1;
+    task.project = this._name;
+    this._tasks.push(task);
+  }
+
+  deleteTask(id) {
+    this._tasks = this._tasks.filter(task => task.id !== id);
+  }
+
+  deleteAllTasks() {
+    this._tasks = [];
+  }
+
+  getTask(id) {
+    return this._tasks.find(task => task.id === id);
+  }
+
+  getTasksDueToday() {
+    const today = new Date().toDateString();
+    return this._tasks.filter(task => task.dueDate === today);
+  }
+
+  getTasksDueThisWeek() {
+    const now = new Date();
+    const startOfThisWeek = startOfWeek(now, { weekStartsOn: 1});
+    const endOfThisWeek = endOfWeek(now, {weekStartsOn: 1});
+    return this._tasks.filter(task => isWithinInterval(task.dueDate, {start: startOfThisWeek, end: endOfThisWeek }));
+  }
+}
+
+export { Project };
+
+// const project1 = new Project("Test Project Title");
+
+// const task1 = new Task("1", "Work Project", "Active", "Test title", "Test desc", "2023-09-15", "High", "Meeting notes", ["Item 1", "Item 2"]);
+
+// project1.addTask(task1);
+
+// console.table(project1);
+--------------------------
+Path: ProjectManager.js
+
+import { Project } from "./modules/Project";
+
+class ProjectManager {
+  constructor() {
+    this._projects = [];
+  }
+
+  get projects() {
+    return this._projects;
+  }
+  
+  addProject(name) {
+    let id = _projects.length + 1;
+    const project = new Project(id, name);
+    this._projects.push(project);
+    return project;
+  }
+
+  renameProject(id, newName) {
+    project = this._projects.find(project => project.id === id);
+    project.name = newName;
+  }
+
+  deleteProject(projectId) {
+    this.projects = projects.filter(project => project.id !== projectId);
+  }
+
+}
+
+export { ProjectManager };
+--------------------------
+Path: Task.js
+
+class Task {
+  constructor(id, project, status, title, desc, dueDate, priority, notes, checklist) {
+    this._id = id;
+    this._project = project;
+    this._status = status;
+    this._title = title;
+    this._desc = desc;
+    this._dueDate = dueDate;
+    this._priority = priority;
+    this._notes = notes;
+    this._checklist = checklist;
+  }
+
+  get id() {
+    return this._id;
+  }
+
+  get project() {
+    return this._project;
+  }
+  
+  set project(value) {
+    this._project = value;
+  }
+
+  get status() {
+    return this._status;
+  }
+  
+  set status(value) {
+    this._status = value;
+  }
+
+  get title() {
+    return this._title;
+  }
+  
+  set title(value) {
+    this._title = value;
+  }
+
+  get desc() {
+    return this._desc;
+  }
+  
+  set desc(value) {
+    this._desc = value;
+  }
+
+  get dueDate() {
+    return this._dueDate;
+  }
+  
+  set dueDate(value) {
+    this._dueDate = value;
+  }
+
+  get priority() {
+    return this._priority;
+  }
+  
+  set priority(value) {
+    this._priority = value;
+  }
+
+  get notes() {
+    return this._notes;
+  }
+  
+  set notes(value) {
+    this._notes = value;
+  }
+
+  get checklist() {
+    return this._checklist;
+  }
+  
+  set checklist(value) {
+    this._checklist = value;
+  }
+}
+
+export { Task };
+
+// const testTask = new Task("Work Project", "Active", "Test title", "Test desc", "2023-09-15", "High", "Meeting notes", ["Item 1", "Item 2"]);
+
+// console.log(testTask);
+
+// console.log(testTask.title = "Edited test title");
+
+// console.log(testTask);
+--------------------------
+Path: TaskCatalog.js
+
+
+--------------------------
+Path: combined.txt
+
+
+--------------------------
+Path: tempCodeRunnerFile.js
+
+const testTask = new Task(1, "Work Project", "Active", "Test title", "Test desc", "2023-09-15", "High", "Meeting notes", ["Item 1", "Item 2"]);
+
+console.log(testTask);
+
+console.log(testTask.title = "Edited test title");
+
+console.log(testTask);
