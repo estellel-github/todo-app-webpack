@@ -1,35 +1,32 @@
 import { startOfWeek, endOfWeek, isWithinInterval } from 'date-fns';
+import { generateTaskId } from "./generateTaskId";
 
 class TaskManager {
+
   constructor() {
     this._tasks = [];
   }
 
-  addTask(task, projectId, projectCatalog) {
-    task.id = this._tasks.length + 1;
+  addTask(task) {
+    task.id = generateTaskId();
     this._tasks.push(task);
-    const project = projectCatalog.findProjectById(projectId);
-    if (project) {
-      project.addTask(task);
-    }
   }
 
-  deleteTask(taskId, projectId, projectCatalog) {
-    const project = projectCatalog.findProjectById(projectId);
-    if (project) {
-      project.deleteTask(taskId);
-    }
+  deleteTask(taskId) {
+    this._tasks = this._tasks.filter(task => task.id !== taskId);
   }
 
-  moveTask(taskId, fromProjectId, toProjectId, projectManager) {
-    const fromProject = projectManager.findProjectById(fromProjectId);
-    const toProject = projectManager.findProjectById(toProjectId);
-    const task = fromProject.getTask(taskId);
-    if (task && fromProject && toProject) {
-      fromProject.deleteTask(taskId);
-      task.project = toProject.name;
-      toProject.addTask(task);
-    }
+  moveTask(taskId, targetProjectId) {
+    const task = getTask(taskId);
+    task.projectId = targetProjectId;
+  }
+
+  getAllTasks() {
+    return this._tasks;
+  }
+
+  getTask(taskId) {
+    return this._tasks.filter(task => task.id === taskId);
   }
 
   getTasksDueToday() {
@@ -42,6 +39,15 @@ class TaskManager {
     const startOfThisWeek = startOfWeek(now, { weekStartsOn: 1 });
     const endOfThisWeek = endOfWeek(now, { weekStartsOn: 1 });
     return this._tasks.filter(task => isWithinInterval(new Date(task.dueDate), { start: startOfThisWeek, end: endOfThisWeek }));
+  }
+
+  getTasksByProject(projectId) {
+    return this._tasks.filter(task =>
+      task.projectId === projectId);
+  }
+
+  getNumTasksByProject(projectId) {
+    return this.getTasksByProject(projectId).length;
   }
 
 }
