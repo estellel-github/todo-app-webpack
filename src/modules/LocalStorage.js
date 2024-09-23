@@ -1,16 +1,26 @@
-function storeToLocal(allProjects) {
-  const taskCatalogJson = JSON.stringify(allProjects);
+function storeToLocal(allTasks) {
+  const taskCatalogJson = JSON.stringify(allTasks);
   localStorage.setItem("taskCatalog", taskCatalogJson);
 }
 
-function retrieveLocalCatalog() {
+function retrieveAllTasks() {
   const storedCatalogJson = localStorage.getItem("taskCatalog");
-  if (storedCatalogJson && storedCatalogJson.length != 0) {
-    tempCatalog = JSON.parse(storedCatalogJson);
-
-    })
-    displayBookList();
+  let allTasks = [];
+  if (storedCatalogJson && storedCatalogJson.length !== 0) {
+    const tempTasks = JSON.parse(storedCatalogJson);
+    allTasks = tempTasks.map(taskData => new Task(
+      taskData._id,
+      taskData._projectId,
+      taskData._status,
+      taskData._title,
+      taskData._desc,
+      new Date(taskData._dueDate),
+      taskData._priority,
+      taskData._notes,
+      taskData._checklist
+    ));
   } else {
-    console.log("No books found in Local Storage.");
+    console.log("No tasks found in Local Storage.");
   }
+  return allTasks;
 }
