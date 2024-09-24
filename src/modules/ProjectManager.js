@@ -15,7 +15,7 @@ class ProjectManager {
   }
 
   addProject(name) {
-    let projectId = this._projects.length + 1;
+    let projectId = this._projects.length;
     const project = new Project(projectId, name);
     this._projects.push(project);
   }
@@ -30,9 +30,8 @@ class ProjectManager {
   }
 
   deleteProject(projectId) {
-    const project = this.findProjectById(projectId);
     this._projects = this._projects.filter(
-      (project) => project.id !== projectId
+      (project) => project._id !== projectId
     );
   }
 }
