@@ -1,5 +1,4 @@
 import { startOfWeek, endOfWeek, isWithinInterval } from 'date-fns';
-import { generateTaskId } from "./generateTaskId";
 
 class TaskManager {
 
@@ -8,7 +7,6 @@ class TaskManager {
   }
 
   addTask(task) {
-    task.id = generateTaskId();
     this._tasks.push(task);
   }
 
