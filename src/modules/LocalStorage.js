@@ -1,3 +1,5 @@
+import { Task } from "./Task";
+
 function storeToLocal(allTasks) {
   const taskCatalogJson = JSON.stringify(allTasks);
   localStorage.setItem("taskCatalog", taskCatalogJson);
