@@ -8,10 +8,6 @@ class Project {
     return this._id;
   }
 
-  set id(projectId) {
-    this._id = projectId;
-  }
-
   get name() {
     return this._name;
   }
