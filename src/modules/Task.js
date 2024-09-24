@@ -1,6 +1,7 @@
+import { generateTaskId } from "./generateTaskId";
+
 class Task {
   constructor(
-    id,
     projectId,
     status,
     title,
@@ -8,9 +9,9 @@ class Task {
     dueDate,
     priority,
     notes,
-    checklist
+    checklist,
   ) {
-    this._id = id;
+    this._id = generateTaskId();
     this._projectId = projectId;
     this._status = status;
     this._title = title;
@@ -23,10 +24,6 @@ class Task {
 
   get id() {
     return this._id;
-  }
-
-  set id(newId) {
-    this._id = newId;
   }
 
   get projectId() {
