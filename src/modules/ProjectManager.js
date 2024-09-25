@@ -21,7 +21,7 @@ class ProjectManager {
   }
 
   findProjectById(projectId) {
-    return this._projects.find((project) => project.id === projectId);
+    return this._projects.find((project) => project._id === projectId);
   }
 
   renameProject(projectId, newName) {
