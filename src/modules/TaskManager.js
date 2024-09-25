@@ -14,6 +14,10 @@ class TaskManager {
     this._tasks = this._tasks.filter(task => task.id !== taskId);
   }
 
+  deleteAllTasksInProject(projectId) {
+    this._tasks = this._tasks.filter(task => task.projectId !== projectId);
+  }
+
   moveTask(taskId, targetProjectId) {
     const task = getTask(taskId);
     task.projectId = targetProjectId;
