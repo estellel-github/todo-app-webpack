@@ -5,6 +5,8 @@ import { ProjectManager } from "./modules/ProjectManager";
 import { TaskManager } from "./modules/TaskManager";
 import { storedToLocal, retrieveAllTasks } from "./modules/LocalStorage";
 
+let activeProjectId = 0;
+
 const moduleContentDiv = document.querySelector("#module-content");
 
 const sidebar = document.createElement("div");
@@ -13,17 +15,194 @@ sidebar.className = "sidebar";
 const projectListDiv = document.createElement("div");
 projectListDiv.className = "project-list";
 
+const newProjectDiv = document.createElement("div");
+newProjectDiv.className = "new-task";
+
+sidebar.append(projectListDiv);
+sidebar.append(newProjectDiv);
+
 const mainContainer = document.createElement("div");
 mainContainer.className = "main-container";
 
 const taskListDiv = document.createElement("div");
 taskListDiv.className = "task-list";
 
+const taskModal = document.createElement("div");
+taskModal.className = "task-modal";
+
+const projectModal = document.createElement("div");
+projectModal.className = "project-modal";
+
 const projectManager = new ProjectManager();
+projectManager.createInbox();
 const taskManager = new TaskManager();
 
-// TEMPLATE PROJECT AND TASK LIST
+const displayNewProjectContainer = () => {
+  const newProjectButton = document.createElement("button");
+  newProjectButton.className = "new-project-btn";
+  newProjectButton.textContent = "+ Add project";
+  newProjectDiv.append(newProjectButton);
 
+  newProjectButton.addEventListener("click", () => {
+    newProjectDiv.removeChild(newProjectButton);
+
+    const projectNameInput = document.createElement("input");
+    projectNameInput.className = "project-name-input";
+    projectNameInput.value = "Untitled Project";
+    projectNameInput.type = "text";
+
+    const createProjectButton = document.createElement("button");
+    createProjectButton.className = "create-project-btn";
+    createProjectButton.textContent = "Create";
+
+    newProjectDiv.appendChild(projectNameInput);
+    newProjectDiv.appendChild(createProjectButton);
+
+    createProjectButton.addEventListener("click", () => {
+      const projectName = projectNameInput.value
+        ? projectNameInput.value
+        : "Untitled Project";
+      projectManager.addProject(projectName);
+      displayProjectList();
+
+      newProjectDiv.removeChild(projectNameInput);
+      newProjectDiv.removeChild(createProjectButton);
+      newProjectDiv.appendChild(newProjectButton);
+    });
+  });
+};
+
+const clearProjectList = () => {
+  projectListDiv.textContent = "";
+};
+
+const displayProjectList = () => {
+  clearProjectList();
+  const projectListHeader = document.createElement("h2");
+  projectListHeader.textContent = "Projects";
+  projectListDiv.append(projectListHeader);
+
+  projectManager.projects.forEach((project) => {
+    const projectItemDiv = document.createElement("div");
+    projectItemDiv.className = "project-item";
+    projectListDiv.append(projectItemDiv);
+
+    const projectNameDiv = document.createElement("div");
+    projectNameDiv.textContent = project.name;
+    projectItemDiv.append(projectNameDiv);
+
+    const numTasksDiv = document.createElement("div");
+    numTasksDiv.className = "num-tasks";
+    numTasksDiv.textContent = taskManager.getNumTasksByProject(project.id);
+    projectItemDiv.append(numTasksDiv);
+
+    projectNameDiv.addEventListener("click", () => {
+      activeProjectId = project.id;
+      displayTasksInProject(activeProjectId);
+    });
+
+    if (project.id !== 0) {
+      const editIconDiv = document.createElement("button");
+      editIconDiv.className = "edit-icon";
+      editIconDiv.textContent = "✏️";
+      projectItemDiv.append(editIconDiv);
+      editIconDiv.addEventListener("click", () => {
+        activeProjectId = project.id;
+        displayEditProjectModal(activeProjectId);
+      });
+    }
+  });
+};
+
+const displayEditProjectModal = (activeProjectId) => {
+  const project = projectManager.findProjectById(activeProjectId);
+  console.log("test display project MODAL" + project.id);
+  // taskManager.deleteAllTasksInProject(project.id);
+  // projectManager.deleteProject(project.id);
+  // displayProjectList();
+  // displayInboxTasks();
+};
+
+function clearTaskList() {
+  taskListDiv.textContent = "";
+}
+
+const displayTasks = (tabName, tasks) => {
+  clearTaskList();
+  const taskListHeader = document.createElement("h2");
+  taskListHeader.textContent = tabName;
+  taskListDiv.append(taskListHeader);
+
+  if (tasks.length === 0) {
+    const emptyProjectMsg = document.createElement("div");
+    emptyProjectMsg.className = "empty-list-msg";
+    emptyProjectMsg.textContent = "This list is empty. Add a new task!";
+    taskListDiv.append(emptyProjectMsg);
+    return;
+  }
+  tasks.forEach((task) => {
+    const taskItem = document.createElement("div");
+    taskItem.className = "task-item";
+    taskItem.textContent = task.title;
+    taskItem.addEventListener("click", (e) => {
+      e.stopPropagation();
+      displayTaskModal(task.id);
+    });
+    taskListDiv.append(taskItem);
+    mainContainer.append(taskListDiv);
+  });
+};
+
+const displayTaskModal = (taskId) => {
+  let task = taskManager.getTask(taskId);
+  taskModal.textContent = "";
+  console.log(task);
+
+  const elements = [
+    { label: "Project ID", value: task.projectId },
+    { label: "Status", value: task.status },
+    { label: "Title", value: task.title },
+    { label: "Description", value: task.desc },
+    { label: "Due Date", value: task.dueDate },
+    { label: "Priority", value: task.priority },
+    { label: "Notes", value: task.notes },
+  ];
+
+  console.log(elements);
+
+  elements.forEach((elem) => {
+    const div = document.createElement("div");
+    div.className = "task-modal-item";
+    div.textContent = `${elem.label}: ${elem.value}`;
+    taskModal.appendChild(div);
+  });
+
+  const checklistHeader = document.createElement("h3");
+  checklistHeader.textContent = "Checklist";
+  taskModal.appendChild(checklistHeader);
+
+  task.checklist.forEach((item) => {
+    const listItem = document.createElement("div");
+    listItem.className = "task-checklist-item";
+    listItem.textContent = item;
+    taskModal.appendChild(listItem);
+  });
+};
+
+const displayTasksInProject = (projectId) => {
+  const project = projectManager.findProjectById(projectId);
+  displayTasks(project.name, taskManager.getTasksByProject(projectId));
+};
+
+const displayTasksDueToday = () => {
+  displayTasks("Due Today", taskManager.getTasksDueToday());
+};
+
+const displayTasksDueThisWeek = () => {
+  displayTasks("Due This Week", taskManager.getTasksDueThisWeek());
+};
+
+const projectArray = [];
 const testProjectArray = ["Work", "Home", "Hobbies", "Learning"];
 
 const testTaskArray = [
@@ -274,15 +453,14 @@ const testTaskArray = [
   },
 ];
 
-const Projects = (() => {
-  projectManager.createInbox();
+const listProjects = (() => {
   for (let i = 0; i < testProjectArray.length; i++) {
     projectManager.addProject(testProjectArray[i]);
   }
   console.table(projectManager);
 })();
 
-const Tasks = (() => {
+const listTasks = (() => {
   testTaskArray.forEach((taskData) => {
     const task = new Task(
       taskData._projectId,
@@ -299,102 +477,21 @@ const Tasks = (() => {
   console.table(taskManager.getAllTasks());
 })();
 
-const clearProjectList = () => {
-  projectListDiv.textContent = "";
-};
-
-const displayProjectList = () => {
-  clearProjectList();
-  const projectListHeader = document.createElement("h2");
-  projectListHeader.textContent = "Projects";
-  projectListDiv.append(projectListHeader);
-
-  projectManager.projects.forEach((project) => {
-    const projectItemDiv = document.createElement("div");
-    projectItemDiv.className = "project-item";
-    projectListDiv.append(projectItemDiv);
-
-    const projectNameDiv = document.createElement("div");
-    projectNameDiv.textContent = project.name;
-    projectItemDiv.append(projectNameDiv);
-
-    const numTasksDiv = document.createElement("div");
-    numTasksDiv.className = "num-tasks";
-    numTasksDiv.textContent = taskManager.getNumTasksByProject(project.id);
-    projectItemDiv.append(numTasksDiv);
-
-    const deleteIconDiv = document.createElement("div");
-    deleteIconDiv.className = "delete-icon";
-    deleteIconDiv.textContent = "🗑️";
-    projectItemDiv.append(deleteIconDiv);
-
-    projectItemDiv.addEventListener("click", (e) =>
-      listTasksInProject(project.id)
-    );
-
-    sidebar.append(projectListDiv);
-  });
-};
-
-const newProjectContainer = (() => {
-  const newProjectButton = document.createElement("button");
-  newProjectButton.className = "new-project-btn";
-  newProjectButton.textContent = "+ Add project";
-  sidebar.append(newProjectButton);
-  console.log("test");
-})();
-
-function clearTaskList() {
-  taskListDiv.textContent = "";
-}
-
-const displayTasks = (tabName, tasks) => {
-  clearTaskList();
-  const taskListHeader = document.createElement("h2");
-  taskListHeader.textContent = tabName;
-  taskListDiv.append(taskListHeader);
-  tasks.forEach((task) => {
-    const taskItem = document.createElement("div");
-    taskItem.className = "task-item";
-    taskItem.textContent = task.title;
-    taskListDiv.append(taskItem);
-    mainContainer.append(taskListDiv);
-  });
-};
-
-const listInboxTasks = () => {
-  displayTasks("Inbox", taskManager.getTasksByProject(0));
-};
-
-const listTasksInProject = (projectId) => {
-  displayTasks(
-    projectManager.findProjectById(projectId).name,
-    taskManager.getTasksByProject(projectId)
-  );
-};
-
-const listTasksDueToday = () => {
-  displayTasks("Due Today", taskManager.getTasksDueToday());
-};
-
-const listTasksDueThisWeek = () => {
-  displayTasks("Due This Week", taskManager.getTasksDueThisWeek());
-};
-
 const loadPage = (() => {
   moduleContentDiv.append(sidebar);
   moduleContentDiv.append(mainContainer);
+  moduleContentDiv.append(taskListDiv);
   displayProjectList();
-  listTasksInProject(2);
+  displayTasksInProject(activeProjectId);
+  displayNewProjectContainer();
+  moduleContentDiv.append(taskModal);
+  moduleContentDiv.append(projectModal);
 })();
 
-// ADD UI TO DELETE PROJECT
-// ADD UI TO ADD PROJECT
-
 // ADD UI TO CREATE TASK
+// ADD UI TO EDIT TASK
 // ADD UI TO MOVE TASK
 // ADD UI TO DELETE TASK
-// ADD UI TO EDIT TASK
 
 // MAYBE: ADD FILTER IN EACH TASK LIST:
 // -- TO DO are shown
