@@ -28,7 +28,7 @@ class TaskManager {
   }
 
   getTask(taskId) {
-    return this._tasks.filter(task => task.id === taskId);
+    return this._tasks.find(task => task.id === taskId);
   }
 
   getTasksDueToday() {
