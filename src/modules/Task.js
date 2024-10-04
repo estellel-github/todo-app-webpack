@@ -5,21 +5,17 @@ class Task {
     projectId,
     status,
     title,
-    desc,
     dueDate,
     priority,
     notes,
-    checklist,
   ) {
     this._id = generateId();
     this._projectId = projectId;
     this._status = status;
     this._title = title;
-    this._desc = desc;
     this._dueDate = dueDate;
     this._priority = priority;
     this._notes = notes;
-    this._checklist = checklist;
   }
 
   get id() {
@@ -30,8 +26,8 @@ class Task {
     return this._projectId;
   }
 
-  set project(projectId) {
-    this._project = projectId;
+  set projectId(projectId) {
+    this._projectId = projectId;
   }
 
   get status() {
@@ -48,14 +44,6 @@ class Task {
 
   set title(value) {
     this._title = value;
-  }
-
-  get desc() {
-    return this._desc;
-  }
-
-  set desc(value) {
-    this._desc = value;
   }
 
   get dueDate() {
@@ -82,13 +70,6 @@ class Task {
     this._notes = value;
   }
 
-  get checklist() {
-    return this._checklist;
-  }
-
-  set checklist(value) {
-    this._checklist = value;
-  }
 }
 
 export { Task };
