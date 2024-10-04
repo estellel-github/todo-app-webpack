@@ -18,11 +18,15 @@ projectListDiv.className = "project-list";
 const newProjectDiv = document.createElement("div");
 newProjectDiv.className = "new-task";
 
-sidebar.append(projectListDiv);
-sidebar.append(newProjectDiv);
-
 const mainContainer = document.createElement("div");
 mainContainer.className = "main-container";
+
+const newTaskButton = document.createElement("button");
+newTaskButton.className = "new-task-btn";
+newTaskButton.textContent = "+ New Task";
+newTaskButton.addEventListener("click", () => {
+  displayCreateTaskModal();
+});
 
 const taskListDiv = document.createElement("div");
 taskListDiv.className = "task-list";
@@ -30,8 +34,14 @@ taskListDiv.className = "task-list";
 const taskModal = document.createElement("div");
 taskModal.className = "task-modal";
 
+const deleteTaskModal = document.createElement("div");
+deleteTaskModal.className = "delete-task-modal";
+
 const projectModal = document.createElement("div");
 projectModal.className = "project-modal";
+
+const deleteProjectModal = document.createElement("div");
+  deleteProjectModal.className = "delete-project-modal";
 
 const projectManager = new ProjectManager();
 projectManager.createInbox();
@@ -76,6 +86,10 @@ const clearProjectList = () => {
   projectListDiv.textContent = "";
 };
 
+function clearTaskList() {
+  taskListDiv.textContent = "";
+}
+
 const displayProjectList = () => {
   clearProjectList();
   const projectListHeader = document.createElement("h2");
@@ -96,36 +110,94 @@ const displayProjectList = () => {
     numTasksDiv.textContent = taskManager.getNumTasksByProject(project.id);
     projectItemDiv.append(numTasksDiv);
 
-    projectNameDiv.addEventListener("click", () => {
+    projectItemDiv.addEventListener("click", () => {
       activeProjectId = project.id;
       displayTasksInProject(activeProjectId);
     });
 
+    const projectNameInput = document.createElement("input");
+    projectNameInput.type = "text";
+    projectNameInput.value = project.name;
+    projectNameInput.style.display = "none";
+    projectItemDiv.insertBefore(projectNameInput, numTasksDiv);
+
     if (project.id !== 0) {
-      const editIconDiv = document.createElement("button");
-      editIconDiv.className = "edit-icon";
-      editIconDiv.textContent = "✏️";
-      projectItemDiv.append(editIconDiv);
-      editIconDiv.addEventListener("click", () => {
-        activeProjectId = project.id;
-        displayEditProjectModal(activeProjectId);
+      const editIcon = document.createElement("button");
+      editIcon.className = "edit-icon";
+      editIcon.textContent = "✏️";
+
+      const saveIcon = document.createElement("button");
+      saveIcon.className = "save-icon";
+      saveIcon.textContent = "💾";
+      saveIcon.style.display = "none";
+
+      const deleteIcon = document.createElement("button");
+      deleteIcon.className = "delete-icon";
+      deleteIcon.textContent = "🗑️";
+
+      projectItemDiv.append(editIcon);
+      projectItemDiv.append(saveIcon);
+      projectItemDiv.append(deleteIcon);
+
+      editIcon.addEventListener("click", () => {
+        projectNameDiv.style.display = "none";
+        projectNameInput.style.display = "block";
+        editIcon.style.display = "none";
+        saveIcon.style.display = "block";
+      });
+
+      saveIcon.addEventListener("click", () => {
+        const newName = projectNameInput.value;
+        project.name = newName;
+        projectManager.renameProject(project.id, newName);
+
+        projectNameDiv.textContent = newName;
+        projectNameDiv.style.display = "block";
+        projectNameInput.style.display = "none";
+        saveIcon.style.display = "none";
+        editIcon.style.display = "block";
+      });
+
+      deleteIcon.addEventListener("click", () => {
+        displayDeleteProjectModal(project.id);
       });
     }
   });
 };
 
-const displayEditProjectModal = (activeProjectId) => {
-  const project = projectManager.findProjectById(activeProjectId);
-  console.log("test display project MODAL" + project.id);
-  // taskManager.deleteAllTasksInProject(project.id);
-  // projectManager.deleteProject(project.id);
-  // displayProjectList();
-  // displayInboxTasks();
-};
+const displayDeleteProjectModal = (projectId) => {
+  deleteProjectModal.textContent = "";
 
-function clearTaskList() {
-  taskListDiv.textContent = "";
-}
+  const deletionMsg = document.createElement("div");
+  deletionMsg.className = "delete-msg";
+  deletionMsg.textContent = "This project and all its tasks will be deleted permanently.";
+
+  const confirmDeletionBtn = document.createElement("button");
+  confirmDeletionBtn.className = "confirm-btn";
+  confirmDeletionBtn.textContent = "Delete";
+
+  const cancelDeletionBtn = document.createElement("button");
+  cancelDeletionBtn.className = "cancel-btn";
+  cancelDeletionBtn.textContent = "Cancel";
+
+  deleteProjectModal.append(deletionMsg);
+  deleteProjectModal.append(confirmDeletionBtn);
+  deleteProjectModal.append(cancelDeletionBtn);
+
+  moduleContentDiv.append(deleteProjectModal);
+
+  confirmDeletionBtn.addEventListener("click", () => {
+    taskManager.deleteAllTasksInProject(projectId);
+    projectManager.deleteProject(projectId);
+    displayProjectList();
+    displayTasksInProject(0);
+    moduleContentDiv.removeChild(deleteProjectModal);
+  });
+
+  cancelDeletionBtn.addEventListener("click", () => {
+    moduleContentDiv.removeChild(deleteProjectModal);
+  });
+};
 
 const displayTasks = (tabName, tasks) => {
   clearTaskList();
@@ -153,40 +225,218 @@ const displayTasks = (tabName, tasks) => {
   });
 };
 
+const displayCreateTaskModal = () => {
+  const createTaskModal = document.createElement("div");
+  createTaskModal.className = "create-task-modal";
+
+  const defaultTitle = "New Task";
+  const defaultStatus = "To do";
+  const defaultPriority = "High";
+  const defaultNotes = "Add notes here...";
+  const defaultDueDate = new Date().toISOString().split("T")[0];
+
+  const titleEl = document.createElement("input");
+  titleEl.className = "task-title";
+  titleEl.type = "text";
+  titleEl.value = defaultTitle;
+
+  const statusEl = document.createElement("select");
+  statusEl.className = "task-status";
+  ["To do", "In Progress", "Done"].forEach((status) => {
+    const option = document.createElement("option");
+    option.value = status;
+    option.textContent = status;
+    statusEl.append(option);
+  });
+  statusEl.value = defaultStatus;
+
+  const priorityEl = document.createElement("select");
+  priorityEl.className = "task-priority";
+  ["Low", "Medium", "High"].forEach((priority) => {
+    const option = document.createElement("option");
+    option.value = priority;
+    option.textContent = priority;
+    priorityEl.append(option);
+  });
+  priorityEl.value = defaultPriority;
+
+  const dueDateEl = document.createElement("input");
+  dueDateEl.className = "due-date";
+  dueDateEl.type = "date";
+  dueDateEl.value = defaultDueDate;
+
+  const notesEl = document.createElement("textarea");
+  notesEl.className = "notes";
+  notesEl.value = defaultNotes;
+
+  const saveButton = document.createElement("button");
+  saveButton.className = "save-task-btn";
+  saveButton.textContent = "Create Task";
+
+  const cancelButton = document.createElement("button");
+  cancelButton.className = "cancel-task-btn";
+  cancelButton.textContent = "Cancel";
+
+  createTaskModal.appendChild(titleEl);
+  createTaskModal.appendChild(statusEl);
+  createTaskModal.appendChild(priorityEl);
+  createTaskModal.appendChild(dueDateEl);
+  createTaskModal.appendChild(notesEl);
+  createTaskModal.appendChild(saveButton);
+  createTaskModal.appendChild(cancelButton);
+
+  moduleContentDiv.append(createTaskModal);
+
+  saveButton.addEventListener("click", () => {
+    const newTask = new Task(
+      activeProjectId,
+      statusEl.value,
+      titleEl.value,
+      new Date(dueDateEl.value),
+      priorityEl.value,
+      notesEl.value
+    );
+
+    taskManager.addTask(newTask);
+    displayProjectList();
+    displayTasksInProject(activeProjectId);
+    moduleContentDiv.removeChild(createTaskModal);
+  });
+
+  cancelButton.addEventListener("click", () => {
+    moduleContentDiv.removeChild(createTaskModal);
+  });
+};
+
+const displayDeleteTaskModal = (taskId) => {
+  moduleContentDiv.append(deleteTaskModal);
+  deleteTaskModal.textContent = "";
+
+  const deletionMsg = document.createElement("div");
+  deletionMsg.className = "delete-msg";
+  deletionMsg.textContent = "The task will be deleted permanently.";
+
+  const confirmDeletionBtn = document.createElement("button");
+  confirmDeletionBtn.className = "confirm-btn";
+  confirmDeletionBtn.textContent = "Delete";
+
+  const cancelDeletionBtn = document.createElement("button");
+  cancelDeletionBtn.className = "cancel-btn";
+  cancelDeletionBtn.textContent = "Cancel";
+
+  deleteTaskModal.append(deletionMsg);
+  deleteTaskModal.append(confirmDeletionBtn);
+  deleteTaskModal.append(cancelDeletionBtn);
+
+  confirmDeletionBtn.addEventListener("click", () => {
+    taskManager.deleteTask(taskId);
+    displayProjectList();
+    displayTasksInProject(activeProjectId);
+    moduleContentDiv.removeChild(deleteTaskModal);
+    moduleContentDiv.removeChild(taskModal);
+  });
+
+  cancelDeletionBtn.addEventListener("click", () => {
+    moduleContentDiv.removeChild(deleteTaskModal);
+  });
+};
+
 const displayTaskModal = (taskId) => {
   let task = taskManager.getTask(taskId);
   taskModal.textContent = "";
-  console.log(task);
 
-  const elements = [
-    { label: "Project ID", value: task.projectId },
-    { label: "Status", value: task.status },
-    { label: "Title", value: task.title },
-    { label: "Description", value: task.desc },
-    { label: "Due Date", value: task.dueDate },
-    { label: "Priority", value: task.priority },
-    { label: "Notes", value: task.notes },
-  ];
-
-  console.log(elements);
-
-  elements.forEach((elem) => {
-    const div = document.createElement("div");
-    div.className = "task-modal-item";
-    div.textContent = `${elem.label}: ${elem.value}`;
-    taskModal.appendChild(div);
+  const titleEl = document.createElement("input");
+  titleEl.className = "task-title";
+  titleEl.type = "text";
+  titleEl.value = task.title;
+  titleEl.addEventListener("blur", () => {
+    task.title = titleEl.value;
+    taskManager.updateTask(taskId, task);
+    displayTasksInProject(activeProjectId);
   });
 
-  const checklistHeader = document.createElement("h3");
-  checklistHeader.textContent = "Checklist";
-  taskModal.appendChild(checklistHeader);
+  const projectEl = document.createElement("select");
+  projectEl.className = "task-project";
 
-  task.checklist.forEach((item) => {
-    const listItem = document.createElement("div");
-    listItem.className = "task-checklist-item";
-    listItem.textContent = item;
-    taskModal.appendChild(listItem);
+  projectManager.projects.forEach((project) => {
+    const option = document.createElement("option");
+    option.value = project.id;
+    option.textContent = project.name;
+    projectEl.append(option);
   });
+
+  projectEl.value = task.projectId;
+
+  projectEl.addEventListener("change", () => {
+    const newProjectId = parseInt(projectEl.value);
+    taskManager.moveTask(taskId, newProjectId);
+    displayTasksInProject(newProjectId);
+  });
+
+  const statusEl = document.createElement("select");
+  statusEl.className = "task-status";
+  ["To do", "In Progress", "Done"].forEach((status) => {
+    const option = document.createElement("option");
+    option.value = status;
+    option.textContent = status;
+    statusEl.append(option);
+  });
+  statusEl.value = task.status;
+  statusEl.addEventListener("blur", () => {
+    task.status = statusEl.value;
+    taskManager.updateTask(taskId, task);
+    displayTasksInProject(activeProjectId);
+  });
+
+  const priorityEl = document.createElement("select");
+  priorityEl.className = "task-priority";
+  ["Low", "Medium", "High"].forEach((priority) => {
+    const option = document.createElement("option");
+    option.value = priority;
+    option.textContent = priority;
+    priorityEl.append(option);
+  });
+  priorityEl.value = task.priority;
+  priorityEl.addEventListener("blur", () => {
+    task.priority = priorityEl.value;
+    taskManager.updateTask(taskId, task);
+    displayTasksInProject(activeProjectId);
+  });
+
+  const dueDateEl = document.createElement("input");
+  dueDateEl.className = "due-date";
+  dueDateEl.type = "date";
+  dueDateEl.value = task.dueDate.toISOString().split("T")[0];
+  dueDateEl.addEventListener("blur", () => {
+    task.dueDate = new Date(dueDateEl.value);
+    taskManager.updateTask(taskId, task);
+    displayTasksInProject(activeProjectId);
+  });
+
+  const notesEl = document.createElement("textarea");
+  notesEl.className = "notes";
+  notesEl.value = task.notes;
+  notesEl.addEventListener("blur", () => {
+    task.notes = notesEl.value;
+    taskManager.updateTask(taskId, task);
+    displayTasksInProject(activeProjectId);
+  });
+
+  const deleteTaskBtn = document.createElement("button");
+  deleteTaskBtn.className = "deleteTaskBtn";
+  deleteTaskBtn.textContent = "🗑 Delete Task";
+  deleteTaskBtn.addEventListener("click", () => {
+    displayDeleteTaskModal(taskId);
+  });
+
+  taskModal.appendChild(titleEl);
+  taskModal.appendChild(statusEl);
+  taskModal.appendChild(projectEl);
+  taskModal.appendChild(priorityEl);
+  taskModal.appendChild(dueDateEl);
+  taskModal.appendChild(notesEl);
+  taskModal.appendChild(deleteTaskBtn);
+  moduleContentDiv.append(taskModal);
 };
 
 const displayTasksInProject = (projectId) => {
@@ -466,11 +716,9 @@ const listTasks = (() => {
       taskData._projectId,
       taskData._status,
       taskData._title,
-      taskData._desc,
       new Date(taskData._dueDate),
       taskData._priority,
-      taskData._notes,
-      taskData._checklist
+      taskData._notes
     );
     taskManager.addTask(task);
   });
@@ -478,21 +726,29 @@ const listTasks = (() => {
 })();
 
 const loadPage = (() => {
+  sidebar.append(projectListDiv);
+  sidebar.append(newProjectDiv);
   moduleContentDiv.append(sidebar);
+  mainContainer.append(newTaskButton);
   moduleContentDiv.append(mainContainer);
   moduleContentDiv.append(taskListDiv);
   displayProjectList();
   displayTasksInProject(activeProjectId);
   displayNewProjectContainer();
-  moduleContentDiv.append(taskModal);
   moduleContentDiv.append(projectModal);
 })();
 
-// ADD UI TO CREATE TASK
-// ADD UI TO EDIT TASK
-// ADD UI TO MOVE TASK
-// ADD UI TO DELETE TASK
+// TO DO:
 
-// MAYBE: ADD FILTER IN EACH TASK LIST:
+// MOVE SET CHOICES (Status / Priority) to dynamic array
+
+// OPTIMIZE MODAL CLOSING (selection and setting to display none)
+
+
+// NICE TO HAVE:
+
+// ENABLE DRAG-DROP TO MOVE TO OTHER PROJECT
+
+// ADD FILTER IN EACH TASK LIST:
 // -- TO DO are shown
 // -- COMPLETED are hidden but can be revealed
