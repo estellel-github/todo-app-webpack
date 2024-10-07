@@ -204,7 +204,7 @@ const displayTasks = (tabName, tasks) => {
   taskListDiv.append(taskListHeader);
 
   const toDoTasks = tasks.filter(
-    (task) => task.status === "To do" || task.status === "In Progress"
+    (task) => task.status === "To do"
   );
   const doneTasks = tasks.filter((task) => task.status === "Done");
 
@@ -278,7 +278,7 @@ const displayCreateTaskModal = () => {
 
   const statusEl = document.createElement("select");
   statusEl.className = "task-status";
-  ["To do", "In Progress", "Done"].forEach((status) => {
+  ["To do", "Done"].forEach((status) => {
     const option = document.createElement("option");
     option.value = status;
     option.textContent = status;
@@ -411,7 +411,7 @@ const displayTaskModal = (taskId) => {
 
   const statusEl = document.createElement("select");
   statusEl.className = "task-status";
-  ["To do", "In Progress", "Done"].forEach((status) => {
+  ["To do", "Done"].forEach((status) => {
     const option = document.createElement("option");
     option.value = status;
     option.textContent = status;
@@ -547,7 +547,7 @@ const testTaskArray = [
   },
   {
     _projectId: 3,
-    _status: "In Progress",
+    _status: "To do",
     _title: "Build RC Plane",
     _desc: "Assemble the new RC plane kit",
     _dueDate: "2024-10-15",
@@ -561,7 +561,7 @@ const testTaskArray = [
   },
   {
     _projectId: 4,
-    _status: "In Progress",
+    _status: "To do",
     _title: "Learn React",
     _desc: "Complete the advanced React course",
     _dueDate: "2024-10-01",
@@ -609,7 +609,7 @@ const testTaskArray = [
   },
   {
     _projectId: 4,
-    _status: "In Progress",
+    _status: "To do",
     _title: "Study Algebra",
     _desc: "Prepare for upcoming algebra exam",
     _dueDate: "2024-10-12",
@@ -665,7 +665,7 @@ const testTaskArray = [
   },
   {
     _projectId: 4,
-    _status: "In Progress",
+    _status: "To do",
     _title: "Python Programming",
     _desc: "Complete the intermediate Python course",
     _dueDate: "2024-10-20",
@@ -695,7 +695,7 @@ const testTaskArray = [
   },
   {
     _projectId: 3,
-    _status: "In Progress",
+    _status: "To do",
     _title: "Rock Climbing",
     _desc: "Train for the upcoming climbing competition",
     _dueDate: "2024-10-25",
@@ -709,7 +709,7 @@ const testTaskArray = [
   },
   {
     _projectId: 4,
-    _status: "In Progress",
+    _status: "To do",
     _title: "Learn Spanish",
     _desc: "Achieve conversational fluency in Spanish",
     _dueDate: "2024-12-30",
