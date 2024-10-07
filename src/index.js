@@ -204,31 +204,45 @@ const displayTasks = (tabName, tasks) => {
   taskListDiv.append(taskListHeader);
 
   const toDoTasks = tasks.filter(
-    (task) => task.status === "To do"
+    (task) => task.status === "To do" || task.status === "In Progress"
   );
   const doneTasks = tasks.filter((task) => task.status === "Done");
 
-  if (toDoTasks.length === 0) {
-    const emptyProjectMsg = document.createElement("div");
-    emptyProjectMsg.className = "empty-list-msg";
-    emptyProjectMsg.textContent = "This list is empty. Add a new task!";
-    taskListDiv.append(emptyProjectMsg);
-    return;
-  }
-
+  // Handle "To Do" and "In Progress" tasks
   if (toDoTasks.length > 0) {
     toDoTasks.forEach((task) => {
       const taskItem = document.createElement("div");
       taskItem.classList.add("task-item", "to-do");
-      taskItem.textContent = task.title;
-      taskItem.addEventListener("click", (e) => {
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.className = "task-checkbox";
+      checkbox.checked = false;
+      checkbox.addEventListener("click", () => {
+        task.status = "Done";
+        taskManager.updateTask(task.id, task);
+        displayTasksInProject(activeProjectId); // Refresh the task list
+      });
+
+      const taskTitle = document.createElement("span");
+      taskTitle.textContent = task.title;
+      taskTitle.addEventListener("click", (e) => {
         e.stopPropagation();
         displayTaskModal(task.id);
       });
+
+      taskItem.appendChild(checkbox);
+      taskItem.appendChild(taskTitle);
       taskListDiv.append(taskItem);
     });
+  } else {
+    const emptyProjectMsg = document.createElement("div");
+    emptyProjectMsg.className = "empty-list-msg";
+    emptyProjectMsg.textContent = "This list is empty. Add a new task!";
+    taskListDiv.append(emptyProjectMsg);
   }
 
+  // Handle "Done" tasks (collapsible section)
   if (doneTasks.length > 0) {
     const doneHeader = document.createElement("h3");
     doneHeader.className = "collapsible-header";
@@ -241,11 +255,26 @@ const displayTasks = (tabName, tasks) => {
     doneTasks.forEach((task) => {
       const taskItem = document.createElement("div");
       taskItem.className = "task-item";
-      taskItem.textContent = task.title;
-      taskItem.addEventListener("click", (e) => {
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.className = "task-checkbox";
+      checkbox.checked = true;
+      checkbox.addEventListener("click", () => {
+        task.status = "To do";
+        taskManager.updateTask(task.id, task);
+        displayTasksInProject(activeProjectId); // Refresh the task list
+      });
+
+      const taskTitle = document.createElement("span");
+      taskTitle.textContent = task.title;
+      taskTitle.addEventListener("click", (e) => {
         e.stopPropagation();
         displayTaskModal(task.id);
       });
+
+      taskItem.appendChild(checkbox);
+      taskItem.appendChild(taskTitle);
       doneTasksContainer.append(taskItem);
     });
 
@@ -504,16 +533,14 @@ const displayTaskFilters = () => {
   dueTodayBtn.className = "filter-item";
   dueTodayBtn.textContent = "Due Today";
   dueTodayBtn.addEventListener("click", () => {
-    const dueTodayTasks = taskManager.getTasksDueToday();
-    displayTasks("Due Today", dueTodayTasks);
+    displayTasksDueToday();
   });
 
   const dueThisWeekBtn = document.createElement("div");
   dueThisWeekBtn.className = "filter-item";
   dueThisWeekBtn.textContent = "Due This Week";
   dueThisWeekBtn.addEventListener("click", () => {
-    const dueThisWeekTasks = taskManager.getTasksDueThisWeek();
-    displayTasks("Due This Week", dueThisWeekTasks);
+    displayTasksDueThisWeek();
   });
 
   filterContainer.append(allTasksBtn, dueTodayBtn, dueThisWeekBtn);
@@ -521,7 +548,6 @@ const displayTaskFilters = () => {
   sidebar.insertBefore(filterContainer, projectListDiv);
 };
 
-const projectArray = [];
 const testProjectArray = ["Work", "Home", "Hobbies", "Learning"];
 
 const testTaskArray = [
@@ -814,9 +840,6 @@ const loadPage = (() => {
 // TO DO:
 
 // Checkbox to mark task as complete or unmark as to do
-
-// Remove "In Progress" status. Keep just to do or done
-
 // Click in checkbox to mark as Done (-> moves to bottom)
 
 // OPTIMIZE MODAL CLOSING (have a common class, set to display none instead of removing, have bg blurred and close when clicking out)
