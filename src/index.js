@@ -7,6 +7,10 @@ import { storedToLocal, retrieveAllTasks } from "./modules/LocalStorage";
 
 let activeProjectId = 0;
 
+const projectManager = new ProjectManager();
+projectManager.createInbox();
+const taskManager = new TaskManager();
+
 const moduleContentDiv = document.querySelector("#module-content");
 
 const sidebar = document.createElement("div");
@@ -41,11 +45,7 @@ const projectModal = document.createElement("div");
 projectModal.className = "project-modal";
 
 const deleteProjectModal = document.createElement("div");
-  deleteProjectModal.className = "delete-project-modal";
-
-const projectManager = new ProjectManager();
-projectManager.createInbox();
-const taskManager = new TaskManager();
+deleteProjectModal.className = "delete-project-modal";
 
 const displayNewProjectContainer = () => {
   const newProjectButton = document.createElement("button");
@@ -92,9 +92,6 @@ function clearTaskList() {
 
 const displayProjectList = () => {
   clearProjectList();
-  const projectListHeader = document.createElement("h2");
-  projectListHeader.textContent = "Projects";
-  projectListDiv.append(projectListHeader);
 
   projectManager.projects.forEach((project) => {
     const projectItemDiv = document.createElement("div");
@@ -170,7 +167,8 @@ const displayDeleteProjectModal = (projectId) => {
 
   const deletionMsg = document.createElement("div");
   deletionMsg.className = "delete-msg";
-  deletionMsg.textContent = "This project and all its tasks will be deleted permanently.";
+  deletionMsg.textContent =
+    "This project and all its tasks will be deleted permanently.";
 
   const confirmDeletionBtn = document.createElement("button");
   confirmDeletionBtn.className = "confirm-btn";
@@ -205,24 +203,62 @@ const displayTasks = (tabName, tasks) => {
   taskListHeader.textContent = tabName;
   taskListDiv.append(taskListHeader);
 
-  if (tasks.length === 0) {
+  const toDoTasks = tasks.filter(
+    (task) => task.status === "To do" || task.status === "In Progress"
+  );
+  const doneTasks = tasks.filter((task) => task.status === "Done");
+
+  if (toDoTasks.length === 0) {
     const emptyProjectMsg = document.createElement("div");
     emptyProjectMsg.className = "empty-list-msg";
     emptyProjectMsg.textContent = "This list is empty. Add a new task!";
     taskListDiv.append(emptyProjectMsg);
     return;
   }
-  tasks.forEach((task) => {
-    const taskItem = document.createElement("div");
-    taskItem.className = "task-item";
-    taskItem.textContent = task.title;
-    taskItem.addEventListener("click", (e) => {
-      e.stopPropagation();
-      displayTaskModal(task.id);
+
+  if (toDoTasks.length > 0) {
+    toDoTasks.forEach((task) => {
+      const taskItem = document.createElement("div");
+      taskItem.classList.add("task-item", "to-do");
+      taskItem.textContent = task.title;
+      taskItem.addEventListener("click", (e) => {
+        e.stopPropagation();
+        displayTaskModal(task.id);
+      });
+      taskListDiv.append(taskItem);
     });
-    taskListDiv.append(taskItem);
-    mainContainer.append(taskListDiv);
-  });
+  }
+
+  if (doneTasks.length > 0) {
+    const doneHeader = document.createElement("h3");
+    doneHeader.className = "collapsible-header";
+    doneHeader.textContent = "▶ Done";
+
+    const doneTasksContainer = document.createElement("div");
+    doneTasksContainer.className = "done-tasks-container";
+    doneTasksContainer.style.display = "none";
+
+    doneTasks.forEach((task) => {
+      const taskItem = document.createElement("div");
+      taskItem.className = "task-item";
+      taskItem.textContent = task.title;
+      taskItem.addEventListener("click", (e) => {
+        e.stopPropagation();
+        displayTaskModal(task.id);
+      });
+      doneTasksContainer.append(taskItem);
+    });
+
+    doneHeader.addEventListener("click", () => {
+      doneHeader.textContent =
+        doneHeader.textContent === "▼ Done" ? "▶ Done" : "▼ Done";
+      doneTasksContainer.style.display =
+        doneTasksContainer.style.display === "none" ? "block" : "none";
+    });
+
+    taskListDiv.append(doneHeader);
+    taskListDiv.append(doneTasksContainer);
+  }
 };
 
 const displayCreateTaskModal = () => {
@@ -450,6 +486,39 @@ const displayTasksDueToday = () => {
 
 const displayTasksDueThisWeek = () => {
   displayTasks("Due This Week", taskManager.getTasksDueThisWeek());
+};
+
+const displayTaskFilters = () => {
+  const filterContainer = document.createElement("div");
+  filterContainer.className = "filter-container";
+
+  const allTasksBtn = document.createElement("div");
+  allTasksBtn.className = "filter-item";
+  allTasksBtn.textContent = "All Tasks";
+  allTasksBtn.addEventListener("click", () => {
+    const allTasks = taskManager.getAllTasks();
+    displayTasks("All Tasks", allTasks);
+  });
+
+  const dueTodayBtn = document.createElement("div");
+  dueTodayBtn.className = "filter-item";
+  dueTodayBtn.textContent = "Due Today";
+  dueTodayBtn.addEventListener("click", () => {
+    const dueTodayTasks = taskManager.getTasksDueToday();
+    displayTasks("Due Today", dueTodayTasks);
+  });
+
+  const dueThisWeekBtn = document.createElement("div");
+  dueThisWeekBtn.className = "filter-item";
+  dueThisWeekBtn.textContent = "Due This Week";
+  dueThisWeekBtn.addEventListener("click", () => {
+    const dueThisWeekTasks = taskManager.getTasksDueThisWeek();
+    displayTasks("Due This Week", dueThisWeekTasks);
+  });
+
+  filterContainer.append(allTasksBtn, dueTodayBtn, dueThisWeekBtn);
+
+  sidebar.insertBefore(filterContainer, projectListDiv);
 };
 
 const projectArray = [];
@@ -726,29 +795,40 @@ const listTasks = (() => {
 })();
 
 const loadPage = (() => {
+  activeProjectId = 0;
+  displayTasksInProject(activeProjectId);
+
   sidebar.append(projectListDiv);
   sidebar.append(newProjectDiv);
   moduleContentDiv.append(sidebar);
   mainContainer.append(newTaskButton);
   moduleContentDiv.append(mainContainer);
   moduleContentDiv.append(taskListDiv);
-  displayProjectList();
-  displayTasksInProject(activeProjectId);
-  displayNewProjectContainer();
   moduleContentDiv.append(projectModal);
+
+  displayProjectList();
+  displayTaskFilters();
+  displayNewProjectContainer();
 })();
 
 // TO DO:
 
+// Checkbox to mark task as complete or unmark as to do
+
+// Remove "In Progress" status. Keep just to do or done
+
+// Click in checkbox to mark as Done (-> moves to bottom)
+
+// OPTIMIZE MODAL CLOSING (have a common class, set to display none instead of removing, have bg blurred and close when clicking out)
+
 // MOVE SET CHOICES (Status / Priority) to dynamic array
 
-// OPTIMIZE MODAL CLOSING (selection and setting to display none)
-
+// Make responsive (Sidebar -> Task List -> Task)
 
 // NICE TO HAVE:
 
 // ENABLE DRAG-DROP TO MOVE TO OTHER PROJECT
 
-// ADD FILTER IN EACH TASK LIST:
-// -- TO DO are shown
-// -- COMPLETED are hidden but can be revealed
+// Implement basic search
+
+// Make sidebar resizeable
