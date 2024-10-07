@@ -6,6 +6,8 @@ import { TaskManager } from "./modules/TaskManager";
 import { storedToLocal, retrieveAllTasks } from "./modules/LocalStorage";
 
 let activeProjectId = 0;
+let currentViewType = "project";
+let currentFilter = "";
 
 const projectManager = new ProjectManager();
 projectManager.createInbox();
@@ -108,8 +110,9 @@ const displayProjectList = () => {
     projectItemDiv.append(numTasksDiv);
 
     projectItemDiv.addEventListener("click", () => {
+      currentViewType = "project";
       activeProjectId = project.id;
-      displayTasksInProject(activeProjectId);
+      renderCurrentView();
     });
 
     const projectNameInput = document.createElement("input");
@@ -208,7 +211,6 @@ const displayTasks = (tabName, tasks) => {
   );
   const doneTasks = tasks.filter((task) => task.status === "Done");
 
-  // Handle "To Do" and "In Progress" tasks
   if (toDoTasks.length > 0) {
     toDoTasks.forEach((task) => {
       const taskItem = document.createElement("div");
@@ -221,7 +223,7 @@ const displayTasks = (tabName, tasks) => {
       checkbox.addEventListener("click", () => {
         task.status = "Done";
         taskManager.updateTask(task.id, task);
-        displayTasksInProject(activeProjectId); // Refresh the task list
+        renderCurrentView();
       });
 
       const taskTitle = document.createElement("span");
@@ -242,7 +244,6 @@ const displayTasks = (tabName, tasks) => {
     taskListDiv.append(emptyProjectMsg);
   }
 
-  // Handle "Done" tasks (collapsible section)
   if (doneTasks.length > 0) {
     const doneHeader = document.createElement("h3");
     doneHeader.className = "collapsible-header";
@@ -263,7 +264,7 @@ const displayTasks = (tabName, tasks) => {
       checkbox.addEventListener("click", () => {
         task.status = "To do";
         taskManager.updateTask(task.id, task);
-        displayTasksInProject(activeProjectId); // Refresh the task list
+        renderCurrentView();
       });
 
       const taskTitle = document.createElement("span");
@@ -287,6 +288,24 @@ const displayTasks = (tabName, tasks) => {
 
     taskListDiv.append(doneHeader);
     taskListDiv.append(doneTasksContainer);
+  }
+};
+
+const renderCurrentView = () => {
+  if (currentViewType === "project") {
+    displayTasksInProject(activeProjectId);
+  } else if (currentViewType === "filter") {
+    switch (currentFilter) {
+      case "All Tasks":
+        displayTasks("All Tasks", taskManager.getAllTasks());
+        break;
+      case "Due Today":
+        displayTasks("Due Today", taskManager.getTasksDueToday());
+        break;
+      case "Due This Week":
+        displayTasks("Due This Week", taskManager.getTasksDueThisWeek());
+        break;
+    }
   }
 };
 
@@ -364,7 +383,7 @@ const displayCreateTaskModal = () => {
 
     taskManager.addTask(newTask);
     displayProjectList();
-    displayTasksInProject(activeProjectId);
+    renderCurrentView();
     moduleContentDiv.removeChild(createTaskModal);
   });
 
@@ -396,7 +415,7 @@ const displayDeleteTaskModal = (taskId) => {
   confirmDeletionBtn.addEventListener("click", () => {
     taskManager.deleteTask(taskId);
     displayProjectList();
-    displayTasksInProject(activeProjectId);
+    renderCurrentView();
     moduleContentDiv.removeChild(deleteTaskModal);
     moduleContentDiv.removeChild(taskModal);
   });
@@ -417,7 +436,7 @@ const displayTaskModal = (taskId) => {
   titleEl.addEventListener("blur", () => {
     task.title = titleEl.value;
     taskManager.updateTask(taskId, task);
-    displayTasksInProject(activeProjectId);
+    renderCurrentView();
   });
 
   const projectEl = document.createElement("select");
@@ -435,7 +454,7 @@ const displayTaskModal = (taskId) => {
   projectEl.addEventListener("change", () => {
     const newProjectId = parseInt(projectEl.value);
     taskManager.moveTask(taskId, newProjectId);
-    displayTasksInProject(newProjectId);
+    renderCurrentView();
   });
 
   const statusEl = document.createElement("select");
@@ -450,7 +469,7 @@ const displayTaskModal = (taskId) => {
   statusEl.addEventListener("blur", () => {
     task.status = statusEl.value;
     taskManager.updateTask(taskId, task);
-    displayTasksInProject(activeProjectId);
+    renderCurrentView();
   });
 
   const priorityEl = document.createElement("select");
@@ -465,7 +484,7 @@ const displayTaskModal = (taskId) => {
   priorityEl.addEventListener("blur", () => {
     task.priority = priorityEl.value;
     taskManager.updateTask(taskId, task);
-    displayTasksInProject(activeProjectId);
+    renderCurrentView();
   });
 
   const dueDateEl = document.createElement("input");
@@ -475,7 +494,7 @@ const displayTaskModal = (taskId) => {
   dueDateEl.addEventListener("blur", () => {
     task.dueDate = new Date(dueDateEl.value);
     taskManager.updateTask(taskId, task);
-    displayTasksInProject(activeProjectId);
+    renderCurrentView();
   });
 
   const notesEl = document.createElement("textarea");
@@ -484,7 +503,7 @@ const displayTaskModal = (taskId) => {
   notesEl.addEventListener("blur", () => {
     task.notes = notesEl.value;
     taskManager.updateTask(taskId, task);
-    displayTasksInProject(activeProjectId);
+    renderCurrentView();
   });
 
   const deleteTaskBtn = document.createElement("button");
@@ -509,14 +528,6 @@ const displayTasksInProject = (projectId) => {
   displayTasks(project.name, taskManager.getTasksByProject(projectId));
 };
 
-const displayTasksDueToday = () => {
-  displayTasks("Due Today", taskManager.getTasksDueToday());
-};
-
-const displayTasksDueThisWeek = () => {
-  displayTasks("Due This Week", taskManager.getTasksDueThisWeek());
-};
-
 const displayTaskFilters = () => {
   const filterContainer = document.createElement("div");
   filterContainer.className = "filter-container";
@@ -525,6 +536,8 @@ const displayTaskFilters = () => {
   allTasksBtn.className = "filter-item";
   allTasksBtn.textContent = "All Tasks";
   allTasksBtn.addEventListener("click", () => {
+    currentViewType = "filter";
+    currentFilter = "All Tasks";
     const allTasks = taskManager.getAllTasks();
     displayTasks("All Tasks", allTasks);
   });
@@ -533,14 +546,20 @@ const displayTaskFilters = () => {
   dueTodayBtn.className = "filter-item";
   dueTodayBtn.textContent = "Due Today";
   dueTodayBtn.addEventListener("click", () => {
-    displayTasksDueToday();
+    currentViewType = "filter";
+    currentFilter = "Due Today";
+    const dueTodayTasks = taskManager.getTasksDueToday();
+    displayTasks("Due Today", dueTodayTasks);
   });
 
   const dueThisWeekBtn = document.createElement("div");
   dueThisWeekBtn.className = "filter-item";
   dueThisWeekBtn.textContent = "Due This Week";
   dueThisWeekBtn.addEventListener("click", () => {
-    displayTasksDueThisWeek();
+    currentViewType = "filter";
+    currentFilter = "Due This Week";
+    const dueThisWeekTasks = taskManager.getTasksDueThisWeek();
+    displayTasks("Due This Week", dueThisWeekTasks);
   });
 
   filterContainer.append(allTasksBtn, dueTodayBtn, dueThisWeekBtn);
@@ -821,8 +840,7 @@ const listTasks = (() => {
 })();
 
 const loadPage = (() => {
-  activeProjectId = 0;
-  displayTasksInProject(activeProjectId);
+  renderCurrentView();
 
   sidebar.append(projectListDiv);
   sidebar.append(newProjectDiv);
@@ -838,6 +856,8 @@ const loadPage = (() => {
 })();
 
 // TO DO:
+
+// Change logic for view state and refreshing view after actions (filter or project view instead of just project)
 
 // Checkbox to mark task as complete or unmark as to do
 // Click in checkbox to mark as Done (-> moves to bottom)
