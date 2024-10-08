@@ -3,14 +3,20 @@ import { Project } from "./modules/Project";
 import { Task } from "./modules/Task";
 import { ProjectManager } from "./modules/ProjectManager";
 import { TaskManager } from "./modules/TaskManager";
-import { storedToLocal, retrieveAllTasks } from "./modules/LocalStorage";
+import {
+  storeTasksToLocal,
+  storeProjectsToLocal,
+  retrieveLocalTasks,
+  retrieveLocalProjects,
+} from "./modules/LocalStorage";
 
-let activeProjectId = 0;
+let INBOX_ID = 1;
+
+let activeProjectId = INBOX_ID;
 let currentViewType = "project";
 let currentFilter = "";
 
 const projectManager = new ProjectManager();
-projectManager.createInbox();
 const taskManager = new TaskManager();
 
 const moduleContentDiv = document.querySelector("#module-content");
@@ -74,8 +80,9 @@ const displayNewProjectContainer = () => {
       const projectName = projectNameInput.value
         ? projectNameInput.value
         : "Untitled Project";
-      projectManager.addProject(projectName);
-      displayProjectList();
+      projectManager.addProject(null, projectName);
+      storeProjectsToLocal(projectManager.projects);
+      renderProjectList();
 
       newProjectDiv.removeChild(projectNameInput);
       newProjectDiv.removeChild(createProjectButton);
@@ -92,7 +99,7 @@ function clearTaskList() {
   taskListDiv.textContent = "";
 }
 
-const displayProjectList = () => {
+const renderProjectList = () => {
   clearProjectList();
 
   projectManager.projects.forEach((project) => {
@@ -112,7 +119,7 @@ const displayProjectList = () => {
     projectItemDiv.addEventListener("click", () => {
       currentViewType = "project";
       activeProjectId = project.id;
-      renderCurrentView();
+      renderTaskList();
     });
 
     const projectNameInput = document.createElement("input");
@@ -121,7 +128,7 @@ const displayProjectList = () => {
     projectNameInput.style.display = "none";
     projectItemDiv.insertBefore(projectNameInput, numTasksDiv);
 
-    if (project.id !== 0) {
+    if (project.id !== INBOX_ID) {
       const editIcon = document.createElement("button");
       editIcon.className = "edit-icon";
       editIcon.textContent = "✏️";
@@ -150,6 +157,7 @@ const displayProjectList = () => {
         const newName = projectNameInput.value;
         project.name = newName;
         projectManager.renameProject(project.id, newName);
+        storeProjectsToLocal(projectManager.projects);
 
         projectNameDiv.textContent = newName;
         projectNameDiv.style.display = "block";
@@ -190,8 +198,10 @@ const displayDeleteProjectModal = (projectId) => {
   confirmDeletionBtn.addEventListener("click", () => {
     taskManager.deleteAllTasksInProject(projectId);
     projectManager.deleteProject(projectId);
-    displayProjectList();
-    displayTasksInProject(0);
+    storeProjectsToLocal(projectManager.projects);
+    storeTasksToLocal(taskManager.getAllTasks());
+    renderProjectList();
+    displayTasksInProject(INBOX_ID);
     moduleContentDiv.removeChild(deleteProjectModal);
   });
 
@@ -223,7 +233,7 @@ const displayTasks = (tabName, tasks) => {
       checkbox.addEventListener("click", () => {
         task.status = "Done";
         taskManager.updateTask(task.id, task);
-        renderCurrentView();
+        renderTaskList();
       });
 
       const taskTitle = document.createElement("span");
@@ -264,7 +274,7 @@ const displayTasks = (tabName, tasks) => {
       checkbox.addEventListener("click", () => {
         task.status = "To do";
         taskManager.updateTask(task.id, task);
-        renderCurrentView();
+        renderTaskList();
       });
 
       const taskTitle = document.createElement("span");
@@ -291,7 +301,7 @@ const displayTasks = (tabName, tasks) => {
   }
 };
 
-const renderCurrentView = () => {
+const renderTaskList = () => {
   if (currentViewType === "project") {
     displayTasksInProject(activeProjectId);
   } else if (currentViewType === "filter") {
@@ -306,6 +316,8 @@ const renderCurrentView = () => {
         displayTasks("Due This Week", taskManager.getTasksDueThisWeek());
         break;
     }
+  } else {
+    displayTasksInProject(INBOX_ID);
   }
 };
 
@@ -336,7 +348,7 @@ const displayCreateTaskModal = () => {
 
   const priorityEl = document.createElement("select");
   priorityEl.className = "task-priority";
-  ["Low", "Medium", "High"].forEach((priority) => {
+  ["Low", "High"].forEach((priority) => {
     const option = document.createElement("option");
     option.value = priority;
     option.textContent = priority;
@@ -373,6 +385,7 @@ const displayCreateTaskModal = () => {
 
   saveButton.addEventListener("click", () => {
     const newTask = new Task(
+      null,
       activeProjectId,
       statusEl.value,
       titleEl.value,
@@ -382,8 +395,9 @@ const displayCreateTaskModal = () => {
     );
 
     taskManager.addTask(newTask);
-    displayProjectList();
-    renderCurrentView();
+    storeTasksToLocal(taskManager.getAllTasks());
+    renderProjectList();
+    renderTaskList();
     moduleContentDiv.removeChild(createTaskModal);
   });
 
@@ -414,8 +428,9 @@ const displayDeleteTaskModal = (taskId) => {
 
   confirmDeletionBtn.addEventListener("click", () => {
     taskManager.deleteTask(taskId);
-    displayProjectList();
-    renderCurrentView();
+    storeTasksToLocal(taskManager.getAllTasks());
+    renderProjectList();
+    renderTaskList();
     moduleContentDiv.removeChild(deleteTaskModal);
     moduleContentDiv.removeChild(taskModal);
   });
@@ -436,7 +451,8 @@ const displayTaskModal = (taskId) => {
   titleEl.addEventListener("blur", () => {
     task.title = titleEl.value;
     taskManager.updateTask(taskId, task);
-    renderCurrentView();
+    storeTasksToLocal(taskManager.getAllTasks());
+    renderTaskList();
   });
 
   const projectEl = document.createElement("select");
@@ -454,7 +470,8 @@ const displayTaskModal = (taskId) => {
   projectEl.addEventListener("change", () => {
     const newProjectId = parseInt(projectEl.value);
     taskManager.moveTask(taskId, newProjectId);
-    renderCurrentView();
+    storeTasksToLocal(taskManager.getAllTasks());
+    renderTaskList();
   });
 
   const statusEl = document.createElement("select");
@@ -469,12 +486,13 @@ const displayTaskModal = (taskId) => {
   statusEl.addEventListener("blur", () => {
     task.status = statusEl.value;
     taskManager.updateTask(taskId, task);
-    renderCurrentView();
+    storeTasksToLocal(taskManager.getAllTasks());
+    renderTaskList();
   });
 
   const priorityEl = document.createElement("select");
   priorityEl.className = "task-priority";
-  ["Low", "Medium", "High"].forEach((priority) => {
+  ["Low", "High"].forEach((priority) => {
     const option = document.createElement("option");
     option.value = priority;
     option.textContent = priority;
@@ -484,7 +502,8 @@ const displayTaskModal = (taskId) => {
   priorityEl.addEventListener("blur", () => {
     task.priority = priorityEl.value;
     taskManager.updateTask(taskId, task);
-    renderCurrentView();
+    storeTasksToLocal(taskManager.getAllTasks());
+    renderTaskList();
   });
 
   const dueDateEl = document.createElement("input");
@@ -494,7 +513,8 @@ const displayTaskModal = (taskId) => {
   dueDateEl.addEventListener("blur", () => {
     task.dueDate = new Date(dueDateEl.value);
     taskManager.updateTask(taskId, task);
-    renderCurrentView();
+    storeTasksToLocal(taskManager.getAllTasks());
+    renderTaskList();
   });
 
   const notesEl = document.createElement("textarea");
@@ -503,7 +523,8 @@ const displayTaskModal = (taskId) => {
   notesEl.addEventListener("blur", () => {
     task.notes = notesEl.value;
     taskManager.updateTask(taskId, task);
-    renderCurrentView();
+    Tasks(taskManager.getAllTasks());
+    renderTaskList();
   });
 
   const deleteTaskBtn = document.createElement("button");
@@ -524,8 +545,8 @@ const displayTaskModal = (taskId) => {
 };
 
 const displayTasksInProject = (projectId) => {
-  const project = projectManager.findProjectById(projectId);
-  displayTasks(project.name, taskManager.getTasksByProject(projectId));
+  let projectName = projectManager.findProjectNameFromId(projectId);
+  displayTasks(projectName, taskManager.getTasksByProject(projectId));
 };
 
 const displayTaskFilters = () => {
@@ -567,266 +588,24 @@ const displayTaskFilters = () => {
   sidebar.insertBefore(filterContainer, projectListDiv);
 };
 
-const testProjectArray = ["Work", "Home", "Hobbies", "Learning"];
-
-const testTaskArray = [
-  {
-    _projectId: 1,
-    _status: "To do",
-    _title: "Revamp Homepage",
-    _desc: "Redesign the homepage to improve UX",
-    _dueDate: "2024-10-05",
-    _priority: "High",
-    _notes: "Focus on mobile first",
-    _checklist: ["Create wireframes", "Approve designs", "Implement"],
-  },
-  {
-    _projectId: 2,
-    _status: "Done",
-    _title: "Garden Spring Cleaning",
-    _desc: "Organize and clean the garden shed",
-    _dueDate: "2024-10-20",
-    _priority: "Low",
-    _notes: "Check tool conditions",
-    _checklist: ["Sort tools", "Dispose of old chemicals", "Sweep out shed"],
-  },
-  {
-    _projectId: 3,
-    _status: "To do",
-    _title: "Build RC Plane",
-    _desc: "Assemble the new RC plane kit",
-    _dueDate: "2024-10-15",
-    _priority: "High",
-    _notes: "Verify all parts are present",
-    _checklist: [
-      "Inventory parts",
-      "Read assembly instructions",
-      "Begin assembly",
-    ],
-  },
-  {
-    _projectId: 4,
-    _status: "To do",
-    _title: "Learn React",
-    _desc: "Complete the advanced React course",
-    _dueDate: "2024-10-01",
-    _priority: "High",
-    _notes: "Focus on hooks and context",
-    _checklist: [
-      "Finish course videos",
-      "Complete hands-on project",
-      "Review course material",
-    ],
-  },
-  {
-    _projectId: 1,
-    _status: "To do",
-    _title: "Staff Training Session",
-    _desc: "Organize a training session on data security",
-    _dueDate: "2024-11-10",
-    _priority: "Low",
-    _notes: "Coordinate with IT department",
-    _checklist: ["Prepare materials", "Schedule IT speaker", "Send invites"],
-  },
-  {
-    _projectId: 2,
-    _status: "To do",
-    _title: "Remodel Kitchen",
-    _desc: "Plan and execute a kitchen remodel",
-    _dueDate: "2024-12-25",
-    _priority: "High",
-    _notes: "Finalize design by next month",
-    _checklist: [
-      "Choose new appliances",
-      "Select countertops",
-      "Hire contractor",
-    ],
-  },
-  {
-    _projectId: 3,
-    _status: "Done",
-    _title: "Photography Outing",
-    _desc: "Organize a weekend photography trip",
-    _dueDate: "2024-09-30",
-    _priority: "Low",
-    _notes: "Focus on landscape shots",
-    _checklist: ["Select location", "Check weather", "Pack gear"],
-  },
-  {
-    _projectId: 4,
-    _status: "To do",
-    _title: "Study Algebra",
-    _desc: "Prepare for upcoming algebra exam",
-    _dueDate: "2024-10-12",
-    _priority: "High",
-    _notes: "Focus on quadratic equations",
-    _checklist: [
-      "Review textbook",
-      "Solve practice problems",
-      "Attend study group",
-    ],
-  },
-  {
-    _projectId: 1,
-    _status: "To do",
-    _title: "Annual Report",
-    _desc: "Compile the annual performance report",
-    _dueDate: "2024-11-01",
-    _priority: "High",
-    _notes: "Include all departmental summaries",
-    _checklist: [
-      "Collect department data",
-      "Draft report",
-      "Review with executives",
-    ],
-  },
-  {
-    _projectId: 2,
-    _status: "Done",
-    _title: "Install Home Security System",
-    _desc: "Select and install a new home security system",
-    _dueDate: "2024-09-18",
-    _priority: "Low",
-    _notes: "Ensure all entrances are covered",
-    _checklist: [
-      "Research systems",
-      "Purchase equipment",
-      "Install by professionals",
-    ],
-  },
-  {
-    _projectId: 3,
-    _status: "To do",
-    _title: "Painting Class",
-    _desc: "Attend a local painting class",
-    _dueDate: "2024-10-31",
-    _priority: "Low",
-    _notes: "Choose acrylics or oils",
-    _checklist: [
-      "Register for class",
-      "Purchase supplies",
-      "Attend first session",
-    ],
-  },
-  {
-    _projectId: 4,
-    _status: "To do",
-    _title: "Python Programming",
-    _desc: "Complete the intermediate Python course",
-    _dueDate: "2024-10-20",
-    _priority: "High",
-    _notes: "Emphasize data analysis",
-    _checklist: ["Complete modules", "Work on project", "Pass final exam"],
-  },
-  {
-    _projectId: 1,
-    _status: "Done",
-    _title: "Client Presentation",
-    _desc: "Prepare and deliver the Q4 client presentation",
-    _dueDate: "2024-09-25",
-    _priority: "High",
-    _notes: "Focus on new services",
-    _checklist: ["Draft slides", "Review with team", "Practice presentation"],
-  },
-  {
-    _projectId: 2,
-    _status: "To do",
-    _title: "Family Reunion",
-    _desc: "Plan the annual family reunion",
-    _dueDate: "2024-10-29",
-    _priority: "Low",
-    _notes: "Send out invitations by end of month",
-    _checklist: ["Create guest list", "Send invitations", "Plan catering"],
-  },
-  {
-    _projectId: 3,
-    _status: "To do",
-    _title: "Rock Climbing",
-    _desc: "Train for the upcoming climbing competition",
-    _dueDate: "2024-10-25",
-    _priority: "High",
-    _notes: "Increase training sessions",
-    _checklist: [
-      "Practice regularly",
-      "Hire a coach",
-      "Join local climbing club",
-    ],
-  },
-  {
-    _projectId: 4,
-    _status: "To do",
-    _title: "Learn Spanish",
-    _desc: "Achieve conversational fluency in Spanish",
-    _dueDate: "2024-12-30",
-    _priority: "High",
-    _notes: "Practice daily",
-    _checklist: [
-      "Daily Duolingo lessons",
-      "Weekly tutor sessions",
-      "Spanish conversation meetup",
-    ],
-  },
-  {
-    _projectId: 1,
-    _status: "To do",
-    _title: "Upgrade Network Infrastructure",
-    _desc:
-      "Upgrade the office network infrastructure to support new technologies",
-    _dueDate: "2024-11-15",
-    _priority: "High",
-    _notes: "Minimize downtime",
-    _checklist: [
-      "Evaluate current hardware",
-      "Select new hardware",
-      "Schedule installation",
-    ],
-  },
-  {
-    _projectId: 2,
-    _status: "Done",
-    _title: "Decorate Living Room",
-    _desc: "Redecorate the living room with a new theme",
-    _dueDate: "2024-09-22",
-    _priority: "Low",
-    _notes: "Decide between modern or rustic",
-    _checklist: [
-      "Choose color scheme",
-      "Purchase furniture",
-      "Arrange delivery",
-    ],
-  },
-  {
-    _projectId: 3,
-    _status: "Done",
-    _title: "Complete Knitting Project",
-    _desc: "Finish knitting the winter scarf project",
-    _dueDate: "2024-11-30",
-    _priority: "Low",
-    _notes: "Prepare for holiday gifts",
-    _checklist: ["Select yarn", "Knit main piece", "Add fringe ends"],
-  },
-  {
-    _projectId: 4,
-    _status: "To do",
-    _title: "Online Course Creation",
-    _desc: "Develop an online course on web development",
-    _dueDate: "2024-12-15",
-    _priority: "High",
-    _notes: "Structure course into modules",
-    _checklist: ["Outline course", "Record video lectures", "Publish course"],
-  },
-];
-
-const listProjects = (() => {
-  for (let i = 0; i < testProjectArray.length; i++) {
-    projectManager.addProject(testProjectArray[i]);
+const listProjects = () => {
+  projectManager.addProject(INBOX_ID, "Inbox");
+  let storedProjectArray = retrieveLocalProjects();
+  if (storedProjectArray && storedProjectArray.length > 0) {
+    storedProjectArray.forEach((projectData) => {
+      projectManager.addProject(projectData._id, projectData._name);
+    });
   }
   console.table(projectManager);
-})();
+};
 
-const listTasks = (() => {
-  testTaskArray.forEach((taskData) => {
+listProjects();
+
+const listTasks = () => {
+  let storedTaskArray = retrieveLocalTasks();
+  storedTaskArray.forEach((taskData) => {
     const task = new Task(
+      taskData.id,
       taskData._projectId,
       taskData._status,
       taskData._title,
@@ -837,10 +616,15 @@ const listTasks = (() => {
     taskManager.addTask(task);
   });
   console.table(taskManager.getAllTasks());
-})();
+};
+
+listTasks();
 
 const loadPage = (() => {
-  renderCurrentView();
+  retrieveLocalProjects();
+  retrieveLocalTasks();
+  renderTaskList();
+  renderProjectList();
 
   sidebar.append(projectListDiv);
   sidebar.append(newProjectDiv);
@@ -850,22 +634,19 @@ const loadPage = (() => {
   moduleContentDiv.append(taskListDiv);
   moduleContentDiv.append(projectModal);
 
-  displayProjectList();
   displayTaskFilters();
   displayNewProjectContainer();
-})();
+});
+
+loadPage();
 
 // TO DO:
 
-// Change logic for view state and refreshing view after actions (filter or project view instead of just project)
+// New task button => only display for project view (not filtered views!)
 
-// Checkbox to mark task as complete or unmark as to do
-// Click in checkbox to mark as Done (-> moves to bottom)
+// ADJUST MODAL CLOSING LOGIC (have a common class, set to display none instead of removing, have bg blurred and close when clicking out)
 
-// OPTIMIZE MODAL CLOSING (have a common class, set to display none instead of removing, have bg blurred and close when clicking out)
-
-// MOVE SET CHOICES (Status / Priority) to dynamic array
-
+// "Prettify"
 // Make responsive (Sidebar -> Task List -> Task)
 
 // NICE TO HAVE:
