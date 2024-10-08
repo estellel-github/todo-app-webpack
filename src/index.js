@@ -21,39 +21,85 @@ const taskManager = new TaskManager();
 
 const moduleContentDiv = document.querySelector("#module-content");
 
+const modalContentDiv = document.querySelector("#modal-content");
+
 const sidebar = document.createElement("div");
 sidebar.className = "sidebar";
+
+const filterContainer = document.createElement("div");
+filterContainer.className = "filter-container";
 
 const projectListDiv = document.createElement("div");
 projectListDiv.className = "project-list";
 
 const newProjectDiv = document.createElement("div");
-newProjectDiv.className = "new-task";
+newProjectDiv.className = "new-project";
 
-const mainContainer = document.createElement("div");
-mainContainer.className = "main-container";
+const taskListContainer = document.createElement("div");
+taskListContainer.className = "task-list-container";
+
+const createTaskDiv = document.createElement("div");
+createTaskDiv.className = "create-task-div";
 
 const newTaskButton = document.createElement("button");
 newTaskButton.className = "new-task-btn";
 newTaskButton.textContent = "+ New Task";
 newTaskButton.addEventListener("click", () => {
-  displayCreateTaskModal();
+  displayCreateTaskDiv();
+});
+
+const header = document.createElement("header");
+const h1 = document.createElement("h1");
+h1.textContent = "✔️ [to do]";
+header.append(h1);
+h1.addEventListener("click", function () {
+  activeProjectId = INBOX_ID;
+  renderPage();
+});
+
+const toggleNewTaskButton = (shouldShow) => {
+  shouldShow
+    ? newTaskButton.classList.remove("display-none")
+    : newTaskButton.classList.add("display-none");
+};
+
+const toggleTaskPane = (shouldShow) => {
+  shouldShow
+    ? taskPane.classList.remove("display-none")
+    : taskPane.classList.add("display-none");
+};
+
+const clearHideTaskPane = () => {
+  taskPane.textContent = "";
+  createTaskDiv.textContent = "";
+  toggleTaskPane(false);
+};
+
+document.addEventListener("click", (event) => {
+  const isClickOutside = !taskPane.contains(event.target) && !event.target.classList.contains("task-item") && !event.target.classList.contains("new-task-btn");
+  if (!taskPane.classList.contains("display-none") && isClickOutside) {
+    clearHideTaskPane();
+  }
 });
 
 const taskListDiv = document.createElement("div");
 taskListDiv.className = "task-list";
 
-const taskModal = document.createElement("div");
-taskModal.className = "task-modal";
+const taskPane = document.createElement("div");
+taskPane.className = "task-pane";
 
-const deleteTaskModal = document.createElement("div");
-deleteTaskModal.className = "delete-task-modal";
+const modal = document.createElement("div");
+modal.className = "modal";
 
-const projectModal = document.createElement("div");
-projectModal.className = "project-modal";
-
-const deleteProjectModal = document.createElement("div");
-deleteProjectModal.className = "delete-project-modal";
+const toggleModal = (shouldShow) => {
+  if (shouldShow) {
+    modal.classList.remove("display-none");
+    moduleContentDiv.classList.add("blurred");
+  } else {
+    modal.classList.add("display-none");
+    moduleContentDiv.classList.remove("blurred");
+  }
+};
 
 const displayNewProjectContainer = () => {
   const newProjectButton = document.createElement("button");
@@ -82,7 +128,10 @@ const displayNewProjectContainer = () => {
         : "Untitled Project";
       projectManager.addProject(null, projectName);
       storeProjectsToLocal(projectManager.projects);
+      storeTasksToLocal(taskManager.getAllTasks());
       renderProjectList();
+      renderTaskList();
+      displayTaskFilters();
 
       newProjectDiv.removeChild(projectNameInput);
       newProjectDiv.removeChild(createProjectButton);
@@ -101,6 +150,7 @@ function clearTaskList() {
 
 const renderProjectList = () => {
   clearProjectList();
+  retrieveLocalProjects();
 
   projectManager.projects.forEach((project) => {
     const projectItemDiv = document.createElement("div");
@@ -108,25 +158,28 @@ const renderProjectList = () => {
     projectListDiv.append(projectItemDiv);
 
     const projectNameDiv = document.createElement("div");
+    projectNameDiv.className = "project-name";
     projectNameDiv.textContent = project.name;
     projectItemDiv.append(projectNameDiv);
 
-    const numTasksDiv = document.createElement("div");
-    numTasksDiv.className = "num-tasks";
-    numTasksDiv.textContent = taskManager.getNumTasksByProject(project.id);
-    projectItemDiv.append(numTasksDiv);
+    const numTodoTasksDiv = document.createElement("div");
+    numTodoTasksDiv.className = "num-tasks";
+    numTodoTasksDiv.textContent = taskManager.getTasksByProject(project.id).filter(task => task.status !== "Done").length;
+    projectItemDiv.append(numTodoTasksDiv);
 
     projectItemDiv.addEventListener("click", () => {
       currentViewType = "project";
       activeProjectId = project.id;
       renderTaskList();
+      renderProjectList();
+      displayTaskFilters();
     });
 
     const projectNameInput = document.createElement("input");
     projectNameInput.type = "text";
     projectNameInput.value = project.name;
     projectNameInput.style.display = "none";
-    projectItemDiv.insertBefore(projectNameInput, numTasksDiv);
+    projectItemDiv.insertBefore(projectNameInput, numTodoTasksDiv);
 
     if (project.id !== INBOX_ID) {
       const editIcon = document.createElement("button");
@@ -174,7 +227,7 @@ const renderProjectList = () => {
 };
 
 const displayDeleteProjectModal = (projectId) => {
-  deleteProjectModal.textContent = "";
+  modal.textContent = "";
 
   const deletionMsg = document.createElement("div");
   deletionMsg.className = "delete-msg";
@@ -189,11 +242,11 @@ const displayDeleteProjectModal = (projectId) => {
   cancelDeletionBtn.className = "cancel-btn";
   cancelDeletionBtn.textContent = "Cancel";
 
-  deleteProjectModal.append(deletionMsg);
-  deleteProjectModal.append(confirmDeletionBtn);
-  deleteProjectModal.append(cancelDeletionBtn);
+  modal.append(deletionMsg);
+  modal.append(confirmDeletionBtn);
+  modal.append(cancelDeletionBtn);
 
-  moduleContentDiv.append(deleteProjectModal);
+  toggleModal(true);
 
   confirmDeletionBtn.addEventListener("click", () => {
     taskManager.deleteAllTasksInProject(projectId);
@@ -201,24 +254,25 @@ const displayDeleteProjectModal = (projectId) => {
     storeProjectsToLocal(projectManager.projects);
     storeTasksToLocal(taskManager.getAllTasks());
     renderProjectList();
-    displayTasksInProject(INBOX_ID);
-    moduleContentDiv.removeChild(deleteProjectModal);
+    activeProjectId = INBOX_ID;
+    renderTaskList();
+    displayTaskFilters();
+    toggleModal(false);
   });
 
   cancelDeletionBtn.addEventListener("click", () => {
-    moduleContentDiv.removeChild(deleteProjectModal);
+    toggleModal(false);
   });
 };
 
 const displayTasks = (tabName, tasks) => {
   clearTaskList();
   const taskListHeader = document.createElement("h2");
+  taskListHeader.className = "task-list-header";
   taskListHeader.textContent = tabName;
   taskListDiv.append(taskListHeader);
 
-  const toDoTasks = tasks.filter(
-    (task) => task.status === "To do" || task.status === "In Progress"
-  );
+  const toDoTasks = tasks.filter((task) => task.status === "To do");
   const doneTasks = tasks.filter((task) => task.status === "Done");
 
   if (toDoTasks.length > 0) {
@@ -233,14 +287,17 @@ const displayTasks = (tabName, tasks) => {
       checkbox.addEventListener("click", () => {
         task.status = "Done";
         taskManager.updateTask(task.id, task);
+        storeTasksToLocal(taskManager.getAllTasks());
         renderTaskList();
+        renderProjectList();
+        displayTaskFilters();
       });
 
       const taskTitle = document.createElement("span");
       taskTitle.textContent = task.title;
       taskTitle.addEventListener("click", (e) => {
         e.stopPropagation();
-        displayTaskModal(task.id);
+        displayTaskPane(task.id);
       });
 
       taskItem.appendChild(checkbox);
@@ -274,14 +331,17 @@ const displayTasks = (tabName, tasks) => {
       checkbox.addEventListener("click", () => {
         task.status = "To do";
         taskManager.updateTask(task.id, task);
+        storeTasksToLocal(taskManager.getAllTasks());
         renderTaskList();
+        renderProjectList();
+        displayTaskFilters();
       });
 
       const taskTitle = document.createElement("span");
       taskTitle.textContent = task.title;
       taskTitle.addEventListener("click", (e) => {
         e.stopPropagation();
-        displayTaskModal(task.id);
+        displayTaskPane(task.id);
       });
 
       taskItem.appendChild(checkbox);
@@ -302,11 +362,12 @@ const displayTasks = (tabName, tasks) => {
 };
 
 const renderTaskList = () => {
+  retrieveLocalTasks();
   if (currentViewType === "project") {
     displayTasksInProject(activeProjectId);
-    newTaskButton.style.display = "block";
+    toggleNewTaskButton(true);
   } else if (currentViewType === "filter") {
-    newTaskButton.style.display = "none";
+    toggleNewTaskButton(false);
     switch (currentFilter) {
       case "All Tasks":
         displayTasks("All Tasks", taskManager.getAllTasks());
@@ -320,13 +381,12 @@ const renderTaskList = () => {
     }
   } else {
     displayTasksInProject(INBOX_ID);
-    newTaskButton.style.display = "block";
+    toggleNewTaskButton(true);
   }
 };
 
-const displayCreateTaskModal = () => {
-  const createTaskModal = document.createElement("div");
-  createTaskModal.className = "create-task-modal";
+const displayCreateTaskDiv = () => {
+  createTaskDiv.textContent = "";
 
   const defaultTitle = "New Task";
   const defaultStatus = "To do";
@@ -376,15 +436,15 @@ const displayCreateTaskModal = () => {
   cancelButton.className = "cancel-task-btn";
   cancelButton.textContent = "Cancel";
 
-  createTaskModal.appendChild(titleEl);
-  createTaskModal.appendChild(statusEl);
-  createTaskModal.appendChild(priorityEl);
-  createTaskModal.appendChild(dueDateEl);
-  createTaskModal.appendChild(notesEl);
-  createTaskModal.appendChild(saveButton);
-  createTaskModal.appendChild(cancelButton);
+  createTaskDiv.appendChild(titleEl);
+  createTaskDiv.appendChild(statusEl);
+  createTaskDiv.appendChild(priorityEl);
+  createTaskDiv.appendChild(dueDateEl);
+  createTaskDiv.appendChild(notesEl);
+  createTaskDiv.appendChild(saveButton);
+  createTaskDiv.appendChild(cancelButton);
 
-  moduleContentDiv.append(createTaskModal);
+  toggleTaskPane(true);
 
   saveButton.addEventListener("click", () => {
     const newTask = new Task(
@@ -401,17 +461,20 @@ const displayCreateTaskModal = () => {
     storeTasksToLocal(taskManager.getAllTasks());
     renderProjectList();
     renderTaskList();
-    moduleContentDiv.removeChild(createTaskModal);
+    displayTaskFilters();
+    createTaskDiv.textContent = "";
+    toggleTaskPane(false);
   });
 
   cancelButton.addEventListener("click", () => {
-    moduleContentDiv.removeChild(createTaskModal);
+    createTaskDiv.textContent = "";
+    toggleTaskPane(false);
   });
 };
 
 const displayDeleteTaskModal = (taskId) => {
-  moduleContentDiv.append(deleteTaskModal);
-  deleteTaskModal.textContent = "";
+  toggleModal(true);
+  modal.textContent = "";
 
   const deletionMsg = document.createElement("div");
   deletionMsg.className = "delete-msg";
@@ -425,27 +488,28 @@ const displayDeleteTaskModal = (taskId) => {
   cancelDeletionBtn.className = "cancel-btn";
   cancelDeletionBtn.textContent = "Cancel";
 
-  deleteTaskModal.append(deletionMsg);
-  deleteTaskModal.append(confirmDeletionBtn);
-  deleteTaskModal.append(cancelDeletionBtn);
+  modal.append(deletionMsg);
+  modal.append(confirmDeletionBtn);
+  modal.append(cancelDeletionBtn);
 
   confirmDeletionBtn.addEventListener("click", () => {
     taskManager.deleteTask(taskId);
     storeTasksToLocal(taskManager.getAllTasks());
     renderProjectList();
     renderTaskList();
-    moduleContentDiv.removeChild(deleteTaskModal);
-    moduleContentDiv.removeChild(taskModal);
+    displayTaskFilters();
+    toggleModal(false);
+    toggleTaskPane(false);
   });
 
   cancelDeletionBtn.addEventListener("click", () => {
-    moduleContentDiv.removeChild(deleteTaskModal);
+    toggleModal(false);
   });
 };
 
-const displayTaskModal = (taskId) => {
+const displayTaskPane = (taskId) => {
   let task = taskManager.getTask(taskId);
-  taskModal.textContent = "";
+  taskPane.textContent = "";
 
   const titleEl = document.createElement("input");
   titleEl.className = "task-title";
@@ -455,7 +519,9 @@ const displayTaskModal = (taskId) => {
     task.title = titleEl.value;
     taskManager.updateTask(taskId, task);
     storeTasksToLocal(taskManager.getAllTasks());
+    renderProjectList();
     renderTaskList();
+    displayTaskFilters();
   });
 
   const projectEl = document.createElement("select");
@@ -474,7 +540,9 @@ const displayTaskModal = (taskId) => {
     const newProjectId = parseInt(projectEl.value);
     taskManager.moveTask(taskId, newProjectId);
     storeTasksToLocal(taskManager.getAllTasks());
+    renderProjectList();
     renderTaskList();
+    displayTaskFilters();
   });
 
   const statusEl = document.createElement("select");
@@ -490,7 +558,9 @@ const displayTaskModal = (taskId) => {
     task.status = statusEl.value;
     taskManager.updateTask(taskId, task);
     storeTasksToLocal(taskManager.getAllTasks());
+    renderProjectList();
     renderTaskList();
+    displayTaskFilters();
   });
 
   const priorityEl = document.createElement("select");
@@ -506,7 +576,9 @@ const displayTaskModal = (taskId) => {
     task.priority = priorityEl.value;
     taskManager.updateTask(taskId, task);
     storeTasksToLocal(taskManager.getAllTasks());
+    renderProjectList();
     renderTaskList();
+    displayTaskFilters();
   });
 
   const dueDateEl = document.createElement("input");
@@ -517,7 +589,9 @@ const displayTaskModal = (taskId) => {
     task.dueDate = new Date(dueDateEl.value);
     taskManager.updateTask(taskId, task);
     storeTasksToLocal(taskManager.getAllTasks());
+    renderProjectList();
     renderTaskList();
+    displayTaskFilters();
   });
 
   const notesEl = document.createElement("textarea");
@@ -526,8 +600,10 @@ const displayTaskModal = (taskId) => {
   notesEl.addEventListener("blur", () => {
     task.notes = notesEl.value;
     taskManager.updateTask(taskId, task);
-    Tasks(taskManager.getAllTasks());
+    storeTasksToLocal(taskManager.getAllTasks());
+    renderProjectList();
     renderTaskList();
+    displayTaskFilters();
   });
 
   const deleteTaskBtn = document.createElement("button");
@@ -537,14 +613,15 @@ const displayTaskModal = (taskId) => {
     displayDeleteTaskModal(taskId);
   });
 
-  taskModal.appendChild(titleEl);
-  taskModal.appendChild(statusEl);
-  taskModal.appendChild(projectEl);
-  taskModal.appendChild(priorityEl);
-  taskModal.appendChild(dueDateEl);
-  taskModal.appendChild(notesEl);
-  taskModal.appendChild(deleteTaskBtn);
-  moduleContentDiv.append(taskModal);
+  taskPane.appendChild(titleEl);
+  taskPane.appendChild(statusEl);
+  taskPane.appendChild(projectEl);
+  taskPane.appendChild(priorityEl);
+  taskPane.appendChild(dueDateEl);
+  taskPane.appendChild(notesEl);
+  taskPane.appendChild(deleteTaskBtn);
+
+  toggleTaskPane(true);
 };
 
 const displayTasksInProject = (projectId) => {
@@ -553,12 +630,18 @@ const displayTasksInProject = (projectId) => {
 };
 
 const displayTaskFilters = () => {
-  const filterContainer = document.createElement("div");
-  filterContainer.className = "filter-container";
+  filterContainer.textContent = "";
 
   const allTasksBtn = document.createElement("div");
   allTasksBtn.className = "filter-item";
-  allTasksBtn.textContent = "All Tasks";
+  allTasksBtn.textContent = "📋 All Tasks";
+
+  const allTasksNumDiv = document.createElement("div");
+  allTasksNumDiv.className = "num-tasks";
+  allTasksNumDiv.textContent = taskManager.getAllTasks().filter(task => task.status !== "Done").length;
+
+  allTasksBtn.appendChild(allTasksNumDiv);
+
   allTasksBtn.addEventListener("click", () => {
     currentViewType = "filter";
     currentFilter = "All Tasks";
@@ -568,7 +651,14 @@ const displayTaskFilters = () => {
 
   const dueTodayBtn = document.createElement("div");
   dueTodayBtn.className = "filter-item";
-  dueTodayBtn.textContent = "Due Today";
+  dueTodayBtn.textContent = "🔥 Due Today";
+
+  const dueTodayNumDiv = document.createElement("div");
+  dueTodayNumDiv.className = "num-tasks";
+  dueTodayNumDiv.textContent = taskManager.getTasksDueToday().filter(task => task.status !== "Done").length;
+
+  dueTodayBtn.appendChild(dueTodayNumDiv);
+
   dueTodayBtn.addEventListener("click", () => {
     currentViewType = "filter";
     currentFilter = "Due Today";
@@ -578,7 +668,14 @@ const displayTaskFilters = () => {
 
   const dueThisWeekBtn = document.createElement("div");
   dueThisWeekBtn.className = "filter-item";
-  dueThisWeekBtn.textContent = "Due This Week";
+  dueThisWeekBtn.textContent = "🗓️ Due This Week";
+
+  const dueThisWeekNumDiv = document.createElement("div");
+  dueThisWeekNumDiv.className = "num-tasks";
+  dueThisWeekNumDiv.textContent = taskManager.getTasksDueThisWeek().filter(task => task.status !== "Done").length;
+
+  dueThisWeekBtn.appendChild(dueThisWeekNumDiv);
+
   dueThisWeekBtn.addEventListener("click", () => {
     currentViewType = "filter";
     currentFilter = "Due This Week";
@@ -587,12 +684,16 @@ const displayTaskFilters = () => {
   });
 
   filterContainer.append(allTasksBtn, dueTodayBtn, dueThisWeekBtn);
-
-  sidebar.insertBefore(filterContainer, projectListDiv);
 };
 
+filterContainer.addEventListener("click", () => {
+  renderTaskList();
+  renderProjectList();
+  displayTaskFilters();
+});
+
 const listProjects = () => {
-  projectManager.addProject(INBOX_ID, "Inbox");
+  projectManager.addProject(INBOX_ID, "🏠 Inbox");
   let storedProjectArray = retrieveLocalProjects();
   if (storedProjectArray && storedProjectArray.length > 0) {
     storedProjectArray.forEach((projectData) => {
@@ -624,15 +725,22 @@ const listTasks = () => {
 listTasks();
 
 const initializeLayout = () => {
+  moduleContentDiv.textContent = "";
   sidebar.append(projectListDiv);
   sidebar.append(newProjectDiv);
+  sidebar.insertBefore(filterContainer, projectListDiv);
+  moduleContentDiv.append(header);
   moduleContentDiv.append(sidebar);
-  taskListDiv.append(newTaskButton);
-  moduleContentDiv.append(mainContainer);
-  moduleContentDiv.append(taskListDiv);
+  moduleContentDiv.append(taskListContainer);
+  taskListContainer.append(newTaskButton);
+  taskListContainer.append(taskListDiv);
+  taskPane.append(createTaskDiv);
+  moduleContentDiv.append(taskPane);
+  modalContentDiv.append(modal);
 };
 
 const loadPage = () => {
+  activeProjectId = INBOX_ID;
   retrieveLocalProjects();
   retrieveLocalTasks();
   renderTaskList();
@@ -642,24 +750,19 @@ const loadPage = () => {
 
   displayTaskFilters();
   displayNewProjectContainer();
-  newTaskButton.style.display = "block";
+  toggleNewTaskButton(true);
+  toggleModal(false);
+  toggleTaskPane(false);
 };
 
 loadPage();
 
-// TO DO:
+const renderPage = () => {
+  renderTaskList();
+  renderProjectList();
 
-// New task button => only display for project view (not filtered views!)
+  displayTaskFilters();
 
-// ADJUST MODAL CLOSING LOGIC (have a common class, set to display none instead of removing, have bg blurred and close when clicking out)
-
-// "Prettify"
-// Make responsive (Sidebar -> Task List -> Task)
-
-// NICE TO HAVE:
-
-// ENABLE DRAG-DROP TO MOVE TO OTHER PROJECT
-
-// Implement basic search
-
-// Make sidebar resizeable
+  toggleModal(false);
+  toggleTaskPane(false);
+};
