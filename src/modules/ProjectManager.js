@@ -9,19 +9,14 @@ class ProjectManager {
     return this._projects;
   }
 
-  createInbox() {
-    const inbox = new Project(0, "Inbox");
-    this._projects.push(inbox);
-  }
-
-  addProject(name) {
-    let projectId = this._projects.length;
-    const project = new Project(projectId, name);
+  addProject(id, name) {
+    const project = new Project(id, name);
     this._projects.push(project);
   }
 
-  findProjectById(projectId) {
-    return this._projects.find((project) => project._id === projectId);
+  findProjectNameFromId(projectId) {
+    let project = this._projects.find((project) => project._id === projectId);
+    return project.name;
   }
 
   renameProject(projectId, newName) {
