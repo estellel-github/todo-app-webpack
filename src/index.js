@@ -304,7 +304,9 @@ const displayTasks = (tabName, tasks) => {
 const renderTaskList = () => {
   if (currentViewType === "project") {
     displayTasksInProject(activeProjectId);
+    newTaskButton.style.display = "block";
   } else if (currentViewType === "filter") {
+    newTaskButton.style.display = "none";
     switch (currentFilter) {
       case "All Tasks":
         displayTasks("All Tasks", taskManager.getAllTasks());
@@ -318,6 +320,7 @@ const renderTaskList = () => {
     }
   } else {
     displayTasksInProject(INBOX_ID);
+    newTaskButton.style.display = "block";
   }
 };
 
@@ -620,23 +623,27 @@ const listTasks = () => {
 
 listTasks();
 
-const loadPage = (() => {
+const initializeLayout = () => {
+  sidebar.append(projectListDiv);
+  sidebar.append(newProjectDiv);
+  moduleContentDiv.append(sidebar);
+  taskListDiv.append(newTaskButton);
+  moduleContentDiv.append(mainContainer);
+  moduleContentDiv.append(taskListDiv);
+};
+
+const loadPage = () => {
   retrieveLocalProjects();
   retrieveLocalTasks();
   renderTaskList();
   renderProjectList();
 
-  sidebar.append(projectListDiv);
-  sidebar.append(newProjectDiv);
-  moduleContentDiv.append(sidebar);
-  mainContainer.append(newTaskButton);
-  moduleContentDiv.append(mainContainer);
-  moduleContentDiv.append(taskListDiv);
-  moduleContentDiv.append(projectModal);
+  initializeLayout();
 
   displayTaskFilters();
   displayNewProjectContainer();
-});
+  newTaskButton.style.display = "block";
+};
 
 loadPage();
 
