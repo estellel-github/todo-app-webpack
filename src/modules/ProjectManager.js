@@ -20,7 +20,7 @@ class ProjectManager {
   }
 
   renameProject(projectId, newName) {
-    const project = this.findProjectById(projectId);
+    const project = this._projects.find((project) => project._id === projectId);
     project.name = newName;
   }
 
