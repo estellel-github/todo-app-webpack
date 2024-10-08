@@ -1,6 +1,8 @@
+import { generateId } from "./generateId";
+
 class Project {
   constructor(id, name) {
-    this._id = id;
+    this._id = id || generateId();
     this._name = name;
   }
 
