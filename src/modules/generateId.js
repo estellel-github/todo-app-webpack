@@ -1,6 +1,5 @@
 function generateId() {
-  let uuid = self.crypto.randomUUID();
-  return Date.now() + "-" + uuid;
+  return Date.now();
 }
 
 export { generateId };
