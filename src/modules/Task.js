@@ -2,6 +2,7 @@ import { generateId } from "./generateId";
 
 class Task {
   constructor(
+    id,
     projectId,
     status,
     title,
@@ -9,7 +10,7 @@ class Task {
     priority,
     notes,
   ) {
-    this._id = generateId();
+    this._id = id || generateId();
     this._projectId = projectId;
     this._status = status;
     this._title = title;
