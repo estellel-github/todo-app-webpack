@@ -2,32 +2,32 @@ import { Project } from "./Project";
 import { ProjectDetails } from "./types";
 
 class ProjectManager {
-  #projects: Project[];
+  private _projects: Project[];
 
   constructor() {
-    this.#projects = [];
+    this._projects = [];
   }
 
   get projects(): Project[] {
-    return this.#projects;
+    return this._projects;
   }
 
   addProject(projectDetails: ProjectDetails): void {
     const project = new Project(projectDetails);
-    this.#projects.push(project);
+    this._projects.push(project);
   }
 
   findProjectNameFromId(projectId: number): string | undefined {
-    return this.#projects.find((project) => project.id === projectId)?.name;
+    return this._projects.find((project) => project.id === projectId)?.name;
   }
 
   renameProject(projectId: number, newName: string): void {
-    const project = this.#projects.find((project) => project.id === projectId);
+    const project = this._projects.find((project) => project.id === projectId);
     if (project) project.name = newName;
   }
 
   deleteProject(projectId: number): void {
-    this.#projects = this.#projects.filter(
+    this._projects = this._projects.filter(
       (project) => project.id !== projectId
     );
   }

@@ -2,74 +2,74 @@ import { generateId } from "./generateId";
 import { TaskDetails, Status, Priority } from "./types";
 
 class Task {
-  #id: number;
-  #projectId: number;
-  #status: Status;
-  #title: string;
-  #dueDate: Date;
-  #priority: Priority;
-  #notes: string;
+  private _id: number;
+  private _projectId: number;
+  private _status: Status;
+  private _title: string;
+  private _dueDate: Date;
+  private _priority: Priority;
+  private _notes: string;
 
   constructor(taskDetails: TaskDetails) {
-    this.#id = taskDetails.id || generateId();
-    this.#projectId = taskDetails.projectId;
-    this.#status = taskDetails.status;
-    this.#title = taskDetails.title;
-    this.#dueDate = taskDetails.dueDate;
-    this.#priority = taskDetails.priority;
-    this.#notes = taskDetails.notes;
+    this._id = taskDetails.id || generateId();
+    this._projectId = taskDetails.projectId;
+    this._status = taskDetails.status;
+    this._title = taskDetails.title;
+    this._dueDate = taskDetails.dueDate;
+    this._priority = taskDetails.priority;
+    this._notes = taskDetails.notes;
   }
 
   get id(): number {
-    return this.#id;
+    return this._id;
   }
 
   get projectId(): number {
-    return this.#projectId;
+    return this._projectId;
   }
 
   set projectId(projectId: number) {
-    this.#projectId = projectId;
+    this._projectId = projectId;
   }
 
   get status(): Status {
-    return this.#status;
+    return this._status;
   }
 
   set status(value: Status) {
-    this.#status = value;
+    this._status = value;
   }
 
   get title(): string {
-    return this.#title;
+    return this._title;
   }
 
   set title(value: string) {
-    this.#title = value;
+    this._title = value;
   }
 
   get dueDate(): Date {
-    return this.#dueDate;
+    return this._dueDate;
   }
 
   set dueDate(value: Date) {
-    this.#dueDate = value;
+    this._dueDate = value;
   }
 
   get priority(): Priority {
-    return this.#priority;
+    return this._priority;
   }
 
   set priority(value: Priority) {
-    this.#priority = value;
+    this._priority = value;
   }
 
   get notes(): string {
-    return this.#notes;
+    return this._notes;
   }
 
   set notes(value: string) {
-    this.#notes = value;
+    this._notes = value;
   }
 
 }

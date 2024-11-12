@@ -4,7 +4,8 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   font-family: Arial, sans-serif;
 }
@@ -13,7 +14,7 @@ html, body {
   display: grid;
   grid-template-rows: auto 1fr;
   grid-template-columns: 1fr 3fr 2fr;
-  grid-template-areas: 
+  grid-template-areas:
     "header header header"
     "sidebar task-list-container task-pane";
   height: 100vh;
@@ -37,7 +38,7 @@ header {
   overflow-y: auto;
 }
 
-.sidebar .project-item, 
+.sidebar .project-item,
 .sidebar .filter-item {
   cursor: pointer;
   padding: 10px;
@@ -47,7 +48,7 @@ header {
   border-radius: 4px;
 }
 
-.sidebar .project-item:hover, 
+.sidebar .project-item:hover,
 .sidebar .filter-item:hover {
   background-color: #e9ecef;
 }

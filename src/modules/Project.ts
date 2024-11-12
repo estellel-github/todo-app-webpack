@@ -2,24 +2,24 @@ import { generateId } from "./generateId";
 import { ProjectDetails } from "./types";
 
 class Project {
-  #id: number;
-  #name: string;
+  private _id: number;
+  private _name: string;
 
   constructor(projectDetails: ProjectDetails) {
-    this.#id = projectDetails.id || generateId();
-    this.#name = projectDetails.name;
+    this._id = projectDetails.id || generateId();
+    this._name = projectDetails.name;
   }
 
   get id(): number {
-    return this.#id;
+    return this._id;
   }
 
   get name(): string {
-    return this.#name;
+    return this._name;
   }
 
   set name(value: string) {
-    this.#name = value;
+    this.name = value;
   }
 
 }

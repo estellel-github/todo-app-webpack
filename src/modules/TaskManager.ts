@@ -3,54 +3,54 @@ import { startOfWeek, endOfWeek, isWithinInterval } from "date-fns";
 
 class TaskManager {
 
-  #tasks: Task[];
+  private _tasks: Task[];
 
   constructor() {
-    this.#tasks = [];
+    this._tasks = [];
   }
 
   addTask(task: Task): void {
-    this.#tasks.push(task);
+    this._tasks.push(task);
   }
 
   deleteTask(taskId: number): void {
-    this.#tasks = this.#tasks.filter((task) => task.id !== taskId);
+    this._tasks = this._tasks.filter((task) => task.id !== taskId);
   }
 
   deleteAllTasksInProject(projectId: number): void {
-    this.#tasks = this.#tasks.filter((task) => task.projectId !== projectId);
+    this._tasks = this._tasks.filter((task) => task.projectId !== projectId);
   }
 
   getTask(taskId: number): Task | undefined {
-    return this.#tasks.find((task) => task.id === taskId);
+    return this._tasks.find((task) => task.id === taskId);
   }
 
   updateTask(taskId: number, updatedTask: Task): void {
-    let taskIndex = this.#tasks.findIndex((task) => task.id === taskId);
+    let taskIndex = this._tasks.findIndex((task) => task.id === taskId);
     if (taskIndex !== -1) {
-      this.#tasks[taskIndex] = updatedTask;
+      this._tasks[taskIndex] = updatedTask;
     }
   }
 
   moveTask(taskId: number, targetProjectId: number): void {
-    let task = this.#tasks.find((task) => task.id === taskId);
+    let task = this._tasks.find((task) => task.id === taskId);
     if (task) task.projectId = targetProjectId;
   }
 
   getAllTasks(): Task[] {
-    return this.#tasks;
+    return this._tasks;
   }
 
   getTasksDueToday(): Task[] {
     const today = new Date().toDateString();
-    return this.#tasks.filter((task) => task.dueDate.toDateString() === today);
+    return this._tasks.filter((task) => task.dueDate.toDateString() === today);
   }
 
   getTasksDueThisWeek(): Task[] {
     const now = new Date();
     const startOfThisWeek = startOfWeek(now, { weekStartsOn: 1 });
     const endOfThisWeek = endOfWeek(now, { weekStartsOn: 1 });
-    return this.#tasks.filter((task) =>
+    return this._tasks.filter((task) =>
       isWithinInterval(new Date(task.dueDate), {
         start: startOfThisWeek,
         end: endOfThisWeek,
@@ -59,7 +59,7 @@ class TaskManager {
   }
 
   getTasksByProject(projectId: number): Task[] {
-    return this.#tasks.filter((task) => task.projectId === projectId);
+    return this._tasks.filter((task) => task.projectId === projectId);
   }
 
   getNumTasksByProject(projectId: number): number {
