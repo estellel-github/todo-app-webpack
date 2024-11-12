@@ -513,6 +513,8 @@ const displayDeleteTaskModal = (taskId: number) => {
 
 const displayTaskPane = (taskId: number) => {
   let task = taskManager.getTask(taskId);
+  if (!task) return; // Or throw error
+
   taskPane.textContent = "";
 
   const titleEl = document.createElement("input");
@@ -630,6 +632,7 @@ const displayTaskPane = (taskId: number) => {
 
 const displayTasksInProject = (projectId: number) => {
   let projectName = projectManager.findProjectNameFromId(projectId);
+  if (!projectName) return; // Or throw error
   displayTasks(projectName, taskManager.getTasksByProject(projectId));
 };
 

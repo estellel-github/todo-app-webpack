@@ -27,8 +27,8 @@ class ProjectManager {
         __classPrivateFieldGet(this, _ProjectManager_projects, "f").push(project);
     }
     findProjectNameFromId(projectId) {
-        const project = __classPrivateFieldGet(this, _ProjectManager_projects, "f").find((project) => project.id === projectId);
-        return project ? project.name : undefined;
+        var _a;
+        return (_a = __classPrivateFieldGet(this, _ProjectManager_projects, "f").find((project) => project.id === projectId)) === null || _a === void 0 ? void 0 : _a.name;
     }
     renameProject(projectId, newName) {
         const project = __classPrivateFieldGet(this, _ProjectManager_projects, "f").find((project) => project.id === projectId);

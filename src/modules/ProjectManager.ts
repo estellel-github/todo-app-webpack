@@ -17,9 +17,8 @@ class ProjectManager {
     this.#projects.push(project);
   }
 
-  findProjectNameFromId(projectId: number): string {
-    const project = this.#projects.find((project) => project.id === projectId);
-    return project ? project.name : undefined;
+  findProjectNameFromId(projectId: number): string | undefined {
+    return this.#projects.find((project) => project.id === projectId)?.name;
   }
 
   renameProject(projectId: number, newName: string): void {

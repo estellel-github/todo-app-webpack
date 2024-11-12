@@ -21,7 +21,7 @@ class TaskManager {
     this.#tasks = this.#tasks.filter((task) => task.projectId !== projectId);
   }
 
-  getTask(taskId: number): Task {
+  getTask(taskId: number): Task | undefined {
     return this.#tasks.find((task) => task.id === taskId);
   }
 
