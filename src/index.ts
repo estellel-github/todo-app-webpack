@@ -1,5 +1,4 @@
 import "./styles/styles.css";
-import { Project } from "./modules/Project";
 import { Task } from "./modules/Task";
 import { ProjectManager } from "./modules/ProjectManager";
 import { TaskManager } from "./modules/TaskManager";
@@ -170,7 +169,7 @@ const renderProjectList = () => {
     numTodoTasksDiv.textContent = taskManager.getTasksByProject(project.id).filter(task => task.status !== "Done").length.toString();
     projectItemDiv.append(numTodoTasksDiv);
 
-    projectItemDiv.addEventListener("click", () => {
+    projectNameDiv.addEventListener("click", () => {
       currentViewType = "project";
       activeProjectId = project.id;
       renderTaskList();
