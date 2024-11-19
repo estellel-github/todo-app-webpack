@@ -45,6 +45,7 @@ createTaskDiv.className = "create-task-div";
 const newTaskButton = document.createElement("button");
 newTaskButton.className = "new-task-btn";
 newTaskButton.textContent = "+ New Task";
+
 newTaskButton.addEventListener("click", () => {
   displayCreateTaskDiv();
 });
@@ -64,7 +65,10 @@ const toggleNewTaskButton = (shouldShow: boolean) => {
     : newTaskButton.classList.add("display-none");
 };
 
+let isTaskPaneOpen = false;
+
 const toggleTaskPane = (shouldShow: boolean) => {
+  isTaskPaneOpen = shouldShow;
   shouldShow
     ? taskPane.classList.remove("display-none")
     : taskPane.classList.add("display-none");
@@ -78,8 +82,12 @@ const clearHideTaskPane = () => {
 
 document.addEventListener("click", (event: MouseEvent) => {
   const target = event.target as HTMLElement;
-  const isClickOutside = !taskPane.contains(target) && !target.classList.contains("task-item") && !target.classList.contains("new-task-btn");
-  if (!taskPane.classList.contains("display-none") && isClickOutside) {
+  const isClickOutside =
+    !taskPane.contains(target) &&
+    !target.classList.contains("task-item") &&
+    !target.classList.contains("new-task-btn");
+
+  if (isTaskPaneOpen && isClickOutside) {
     clearHideTaskPane();
   }
 });
@@ -388,7 +396,7 @@ const renderTaskList = () => {
 };
 
 const displayCreateTaskDiv = () => {
-  createTaskDiv.textContent = "";
+  clearHideTaskPane();
 
   const defaultTitle = "New Task";
   const defaultStatus = "To do";
@@ -446,6 +454,8 @@ const displayCreateTaskDiv = () => {
   createTaskDiv.appendChild(saveButton);
   createTaskDiv.appendChild(cancelButton);
 
+  taskPane.appendChild(createTaskDiv);
+
   toggleTaskPane(true);
 
   saveButton.addEventListener("click", () => {
@@ -465,13 +475,11 @@ const displayCreateTaskDiv = () => {
     renderProjectList();
     renderTaskList();
     displayTaskFilters();
-    createTaskDiv.textContent = "";
-    toggleTaskPane(false);
+    clearHideTaskPane();
   });
 
   cancelButton.addEventListener("click", () => {
-    createTaskDiv.textContent = "";
-    toggleTaskPane(false);
+    clearHideTaskPane();
   });
 };
 

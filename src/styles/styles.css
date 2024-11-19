@@ -94,3 +94,7 @@ button {
   filter: blur(5px);
   pointer-events: none;
 }
+
+.create-task-div {
+  border: 1px solid red;
+}
