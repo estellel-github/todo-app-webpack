@@ -24,6 +24,8 @@
     "webpack-dev-server": "^5.1.0"
   },
   "dependencies": {
-    "date-fns": "^4.1.0"
+    "@supabase/supabase-js": "^2.46.1",
+    "date-fns": "^4.1.0",
+    "dotenv": "^16.4.5"
   }
 }
