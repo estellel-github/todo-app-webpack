@@ -4,7 +4,7 @@ A modular, dynamic task management app.
 
 Built with **JavaScript/TypeScript**, leveraging **Webpack** for bundling, and deployed using **gh-pages**.
 
-![alt text](image.png)
+![alt text](image-1.png)
 
 🔗 Live demo: https://estellel-github.github.io/todo-app-webpack/
 
