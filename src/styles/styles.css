@@ -7,7 +7,13 @@
 html,
 body {
   height: 100%;
-  font-family: Arial, sans-serif;
+  font-family: Arial;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 #module-content {
@@ -15,10 +21,12 @@ body {
   grid-template-rows: auto 1fr;
   grid-template-columns: 1fr 3fr 2fr;
   grid-template-areas:
-    "header header header"
-    "sidebar task-list-container task-pane";
+    "header header header header"
+    "sidebar task-list-container task-list-container task-pane";
   height: 100vh;
-  width: 100vw;
+  max-width: 875px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
+  /* Subtle shadow */
 }
 
 header {
@@ -32,40 +40,95 @@ header {
 
 .sidebar {
   grid-area: sidebar;
+  min-width: 320px;
   background-color: #f1f1f1;
   padding: 20px;
   border-right: 1px solid #ddd;
   overflow-y: auto;
+  font-size: 14px;
+}
+
+.filter-container,
+.project-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .sidebar .project-item,
 .sidebar .filter-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   cursor: pointer;
-  padding: 10px;
-  margin-bottom: 5px;
-  background-color: #fff;
-  border: 1px solid #ddd;
+  padding: 15px;
+  background-color: #f1f1f1;
   border-radius: 4px;
 }
 
 .sidebar .project-item:hover,
 .sidebar .filter-item:hover {
-  background-color: #e9ecef;
+  background-color: #dbdbdb85;
+}
+
+.sidebar>div {
+  margin-bottom: 16px;
+}
+
+.project-info,
+.filter-info {
+  display: flex;
+  justify-content: space-between;
+}
+
+.num-tasks {
+  background: #dbdbdbc7;
+  color: #000;
+  margin-right: 5px;
+  padding: 5px 10px;
+  border-radius: 50%;
+  text-align: center;
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.project-options {
+  display: flex;
 }
 
 .task-list-container {
   grid-area: task-list-container;
+  min-width: 320px;
   background-color: #fff;
   padding: 20px;
   border-right: 1px solid #ddd;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .task-pane {
   grid-area: task-pane;
+  width: 320px;
   background-color: #f9f9f9;
   padding: 20px;
   overflow-y: auto;
+}
+
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.task-item {
+  display: flex;
+  gap: 10px;
 }
 
 .display-none {
@@ -73,8 +136,16 @@ header {
 }
 
 button {
-  width: 100%;
-  height: 2rem;
+  border-radius: 5px;
+  padding: 10px;
+  background: #e9e7e7;
+  border: 0px;
+  cursor: pointer;
+  margin: 0 2px 0 2px;
+}
+
+button:hover {
+  background: #d6d4d4a9;
 }
 
 .modal {
@@ -95,6 +166,67 @@ button {
   pointer-events: none;
 }
 
-.create-task-div {
-  border: 1px solid red;
+input[type="text"],
+input[type="password"],
+.due-date,
+textarea,
+select {
+  width: 100%;
+  padding: 10px 15px;
+  margin: 5px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font: Arial;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s ease;
+  background-color: #f9f9f9;
+  color: #333;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Styling on hover */
+input[type="text"]:hover,
+input[type="password"]:hover,
+textarea:hover {
+  border-color: #aaa;
+  /* Slightly darker border on hover */
+}
+
+/* Styling on focus */
+input[type="text"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+  border-color: #007BFF;
+  /* Border color on focus */
+  background-color: #fff;
+  /* Slightly lighter background on focus */
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  /* Blue focus glow */
+}
+
+/* Optional placeholder styling */
+input::placeholder,
+textarea::placeholder {
+  color: #aaa;
+  /* Subtle placeholder text */
+  font-style: italic;
+  /* Optional styling */
+}
+
+/* For textarea specifically */
+textarea {
+  resize: vertical;
+  /* Allow vertical resizing only */
+  min-height: 100px;
+  /* Minimum height for textareas */
+}
+
+.new-project {
+  display: flex;
+  justify-content: end;
+}
+
+.new-project-btn {
+  width: 100%;
 }

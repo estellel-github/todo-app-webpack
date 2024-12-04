@@ -66,6 +66,7 @@ const toggleNewTaskButton = (shouldShow: boolean) => {
 };
 
 let isTaskPaneOpen = false;
+let isModalOpen = false;
 
 const toggleTaskPane = (shouldShow: boolean) => {
   isTaskPaneOpen = shouldShow;
@@ -80,15 +81,19 @@ const clearHideTaskPane = () => {
   toggleTaskPane(false);
 };
 
-document.addEventListener("click", (event: MouseEvent) => {
+document.addEventListener("mousedown", (event: MouseEvent) => {
   const target = event.target as HTMLElement;
-  const isClickOutside =
+  const isClickOutsideTaskPane =
     !taskPane.contains(target) &&
     !target.classList.contains("task-item") &&
     !target.classList.contains("new-task-btn");
 
-  if (isTaskPaneOpen && isClickOutside) {
-    clearHideTaskPane();
+  if (isModalOpen) {
+    return;
+  } else {
+    if (isTaskPaneOpen && isClickOutsideTaskPane) {
+      clearHideTaskPane();
+    }
   }
 });
 
@@ -102,6 +107,7 @@ const modal = document.createElement("div");
 modal.className = "modal";
 
 const toggleModal = (shouldShow: boolean) => {
+  isModalOpen = shouldShow;
   if (shouldShow) {
     modal.classList.remove("display-none");
     moduleContentDiv.classList.add("blurred");
@@ -167,31 +173,34 @@ const renderProjectList = () => {
     projectItemDiv.className = "project-item";
     projectListDiv.append(projectItemDiv);
 
+    const projectInfoDiv = document.createElement("div");
+    projectInfoDiv.className = "project-info";
+    projectItemDiv.append(projectInfoDiv);
+
     const projectNameDiv = document.createElement("div");
     projectNameDiv.className = "project-name";
     projectNameDiv.textContent = project.name;
-    projectItemDiv.append(projectNameDiv);
+    projectInfoDiv.append(projectNameDiv);
 
     const numTodoTasksDiv = document.createElement("div");
     numTodoTasksDiv.className = "num-tasks";
-    numTodoTasksDiv.textContent = taskManager.getTasksByProject(project.id).filter(task => task.status !== "Done").length.toString();
-    projectItemDiv.append(numTodoTasksDiv);
+    numTodoTasksDiv.textContent = taskManager
+      .getTasksByProject(project.id)
+      .filter((task) => task.status !== "Done").length.toString();
+    projectInfoDiv.append(numTodoTasksDiv);
 
-    projectNameDiv.addEventListener("click", () => {
-      currentViewType = "project";
-      activeProjectId = project.id;
-      renderTaskList();
-      renderProjectList();
-      displayTaskFilters();
-    });
+    let projectOptionsDiv = null;
 
     const projectNameInput = document.createElement("input");
     projectNameInput.type = "text";
     projectNameInput.value = project.name;
     projectNameInput.style.display = "none";
-    projectItemDiv.insertBefore(projectNameInput, numTodoTasksDiv);
+    projectItemDiv.insertBefore(projectNameInput, projectInfoDiv);
 
     if (project.id !== INBOX_ID) {
+      projectOptionsDiv = document.createElement("div");
+      projectOptionsDiv.className = "project-options";
+
       const editIcon = document.createElement("button");
       editIcon.className = "edit-icon";
       editIcon.textContent = "✏️";
@@ -205,12 +214,15 @@ const renderProjectList = () => {
       deleteIcon.className = "delete-icon";
       deleteIcon.textContent = "🗑️";
 
-      projectItemDiv.append(editIcon);
-      projectItemDiv.append(saveIcon);
-      projectItemDiv.append(deleteIcon);
+      projectOptionsDiv.append(editIcon);
+      projectOptionsDiv.append(saveIcon);
+      projectOptionsDiv.append(deleteIcon);
+
+      projectItemDiv.append(projectOptionsDiv);
 
       editIcon.addEventListener("click", () => {
         projectNameDiv.style.display = "none";
+        numTodoTasksDiv.style.display = "none";
         projectNameInput.style.display = "block";
         editIcon.style.display = "none";
         saveIcon.style.display = "block";
@@ -224,6 +236,7 @@ const renderProjectList = () => {
 
         projectNameDiv.textContent = newName;
         projectNameDiv.style.display = "block";
+        numTodoTasksDiv.style.display = "block";
         projectNameInput.style.display = "none";
         saveIcon.style.display = "none";
         editIcon.style.display = "block";
@@ -233,6 +246,16 @@ const renderProjectList = () => {
         displayDeleteProjectModal(project.id);
       });
     }
+
+    projectItemDiv.addEventListener("click", (e) => {
+      if (!projectOptionsDiv || !projectOptionsDiv.contains(e.target as Node)) {
+        currentViewType = "project";
+        activeProjectId = project.id;
+        renderTaskList();
+        renderProjectList();
+        displayTaskFilters();
+      }
+    });
   });
 };
 
@@ -646,64 +669,80 @@ const displayTasksInProject = (projectId: number) => {
 const displayTaskFilters = () => {
   filterContainer.textContent = "";
 
-  const allTasksBtn = document.createElement("div");
-  allTasksBtn.className = "filter-item";
-  allTasksBtn.textContent = "📋 All Tasks";
+  const allTasksName = document.createElement("div");
+  allTasksName.textContent = "📋 All Tasks";
 
-  const allTasksNumDiv = document.createElement("div");
-  allTasksNumDiv.className = "num-tasks";
-  allTasksNumDiv.textContent = taskManager.getAllTasks().filter(task => task.status !== "Done").length.toString();
+  const allTasksNum = document.createElement("div");
+  allTasksNum.className = "num-tasks";
+  allTasksNum.textContent = taskManager.getAllTasks().filter(task => task.status !== "Done").length.toString();
 
-  allTasksBtn.appendChild(allTasksNumDiv);
+  const allTasksFilterItem = document.createElement("div");
+  allTasksFilterItem.className = "filter-item";
+  const allTasksFilterInfo = document.createElement("div");
+  allTasksFilterInfo.className = "filter-info";
 
-  allTasksBtn.addEventListener("click", () => {
+  allTasksFilterInfo.appendChild(allTasksName);
+  allTasksFilterInfo.appendChild(allTasksNum);
+  allTasksFilterItem.appendChild(allTasksFilterInfo);
+
+  allTasksFilterItem.addEventListener("click", () => {
     currentViewType = "filter";
     currentFilter = "All Tasks";
     const allTasks = taskManager.getAllTasks();
     displayTasks("All Tasks", allTasks);
   });
 
-  const dueTodayBtn = document.createElement("div");
-  dueTodayBtn.className = "filter-item";
-  dueTodayBtn.textContent = "🔥 Due Today";
+  const dueTodayName = document.createElement("div");
+  dueTodayName.textContent = "🔥 Due Today";
 
-  const dueTodayNumDiv = document.createElement("div");
-  dueTodayNumDiv.className = "num-tasks";
-  dueTodayNumDiv.textContent = taskManager.getTasksDueToday()
+  const dueTodayNum = document.createElement("div");
+  dueTodayNum.className = "num-tasks";
+  dueTodayNum.textContent = taskManager.getTasksDueToday()
     .filter(task => task.status !== "Done")
     .length
     .toString();
 
-  dueTodayBtn.appendChild(dueTodayNumDiv);
+  const dueTodayFilterItem = document.createElement("div");
+  dueTodayFilterItem.className = "filter-item";
+  const dueTodayFilterInfo = document.createElement("div");
+  dueTodayFilterInfo.className = "filter-info";
 
-  dueTodayBtn.addEventListener("click", () => {
+  dueTodayFilterInfo.appendChild(dueTodayName);
+  dueTodayFilterInfo.appendChild(dueTodayNum);
+  dueTodayFilterItem.appendChild(dueTodayFilterInfo);
+
+  dueTodayFilterItem.addEventListener("click", () => {
     currentViewType = "filter";
     currentFilter = "Due Today";
     const dueTodayTasks = taskManager.getTasksDueToday();
     displayTasks("Due Today", dueTodayTasks);
   });
 
-  const dueThisWeekBtn = document.createElement("div");
-  dueThisWeekBtn.className = "filter-item";
-  dueThisWeekBtn.textContent = "🗓️ Due This Week";
+  const dueThisWeekName = document.createElement("div");
+  dueThisWeekName.textContent = "🗓️ Due This Week";
 
-  const dueThisWeekNumDiv = document.createElement("div");
-  dueThisWeekNumDiv.className = "num-tasks";
-  dueThisWeekNumDiv.textContent = taskManager.getTasksDueThisWeek()
-    .filter(task => task.status !== "Done")
-    .length
-    .toString();
+  const dueThisWeekNum = document.createElement("div");
+  dueThisWeekNum.className = "num-tasks";
+  dueThisWeekNum.textContent = taskManager.getTasksDueThisWeek()
+    .filter((task) => task.status !== "Done")
+    .length.toString();
 
-  dueThisWeekBtn.appendChild(dueThisWeekNumDiv);
+  const dueThisWeekFilterItem = document.createElement("div");
+  dueThisWeekFilterItem.className = "filter-item";
+  const dueThisWeekFilterInfo = document.createElement("div");
+  dueThisWeekFilterInfo.className = "filter-info";
 
-  dueThisWeekBtn.addEventListener("click", () => {
+  dueThisWeekFilterInfo.append(dueThisWeekName, dueThisWeekNum);
+  dueThisWeekFilterItem.append(dueThisWeekFilterInfo);
+
+  dueThisWeekFilterItem.addEventListener("click", () => {
     currentViewType = "filter";
     currentFilter = "Due This Week";
     const dueThisWeekTasks = taskManager.getTasksDueThisWeek();
     displayTasks("Due This Week", dueThisWeekTasks);
   });
 
-  filterContainer.append(allTasksBtn, dueTodayBtn, dueThisWeekBtn);
+  filterContainer.append(allTasksFilterItem, dueTodayFilterItem, dueThisWeekFilterItem);
 };
 
 filterContainer.addEventListener("click", () => {
