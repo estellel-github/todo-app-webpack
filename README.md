@@ -44,9 +44,9 @@ Built with **JavaScript/TypeScript**, leveraging **Webpack** for bundling, and d
 
 ---
 
-## Reflection on Vanilla JavaScript
+## Reflection on challenges
 
-While building this project using vanilla JavaScript (TypeScript), I encountered significant challenges related to creating, updating, and managing DOM elements dynamically.
+While building this project using vanilla JavaScript (with TypeScript), I encountered significant challenges related to creating, updating, and managing DOM elements dynamically.
 
 Although the project was functional, the following limitations became clear:
 
@@ -54,7 +54,9 @@ Although the project was functional, the following limitations became clear:
 - State Management: Keeping track of application state, such as the active project or the tasks list, became increasingly complex as the app grew. This led to a higher chance of bugs and harder debugging.
 - Code Readability: With the frequent need to query and update DOM elements manually, the codebase became cluttered and harder to maintain.
 
-While very challenging, this was a great hands-on learning opportunity. It developed my knowledge of vanilla JS/TS but also made me very ready and eager to start learning about frameworks.
+Additionally, keeping all the core of my application in index.ts initially was not a flexible approach, which showed me the benefits of smaller modules to have separation of concerns, more clarity, and better maintainability. I couldn't refactor into smaller modules at the time due to wanting to move on to the rest of the curriculum, but it was definitely a required improvement for this project.
+
+While very challenging, this was a great hands-on learning opportunity. It developed my knowledge of JS but also made me very ready and eager to learn more about frameworks and practice this kind of project in them.
 
 ---
 
