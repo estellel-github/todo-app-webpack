@@ -63,6 +63,8 @@ While very challenging, this was a great hands-on learning opportunity. It devel
 
 ## How to Use
 
+Make sure you have pnpm installed.
+
 1. Clone the repository:
    ```bash
    git clone https://github.com/estellel-github/todo-app-webpack
@@ -70,10 +72,10 @@ While very challenging, this was a great hands-on learning opportunity. It devel
    ```
 2. Install dependencies:
    ```bash
-   npm install
+   pnpm install
    ```
 3. Start the development server:
    ```bash
-   npm start
+   pnpm start
    ```
 4. Open your browser at http://localhost:8080 (or other custom port) to view the site.
