@@ -3,8 +3,9 @@
 A modular, dynamic task management app.
 
 Built with **JavaScript/TypeScript**, leveraging **Webpack** for bundling, and deployed using **gh-pages**.
+This project was done as part of **The Odin Project Curriculum**.
 
-![alt text](image-1.png)
+![Screenshot for To Do App](image.png)
 
 🔗 Live demo: https://estellel-github.github.io/todo-app-webpack/
 
@@ -56,7 +57,7 @@ Although the project was functional, the following limitations became clear:
 
 Additionally, keeping all the core of my application in index.ts initially was not a flexible approach, which showed me the benefits of smaller modules to have separation of concerns, more clarity, and better maintainability. I couldn't refactor into smaller modules at the time due to wanting to move on to the rest of the curriculum, but it was definitely a required improvement for this project.
 
-While very challenging, this was a great hands-on learning opportunity. It developed my knowledge of JS but also made me very ready and eager to learn more about frameworks and practice this kind of project in them.
+While very challenging, this was a great hands-on learning opportunity. It developed my knowledge of JS but also made me very ready and eager to learn other tools across the stack to get this type of project done more smoothly.
 
 ---
 
