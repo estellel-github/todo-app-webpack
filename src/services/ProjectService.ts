@@ -1,7 +1,7 @@
 import { Project } from "../types/ProjectTypes";
 import { ProjectDetails } from "../types/AppTypes";
 
-class ProjectManager {
+class ProjectService {
   private _projects: Project[];
 
   constructor() {
@@ -33,4 +33,4 @@ class ProjectManager {
   }
 }
 
-export { ProjectManager };
+export const projectService = new ProjectService();
