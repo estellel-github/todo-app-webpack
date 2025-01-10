@@ -1,8 +1,7 @@
 import { Task } from "../types/TaskTypes";
 import { Project } from "../types/ProjectTypes";
 import { TaskDetails, ProjectDetails } from "../types/AppTypes";
-
-const TASKS_STORAGE_KEY: string = "TO DO App - Tasks";
+import { TASKS_STORAGE_KEY, PROJECTS_STORAGE_KEY } from "../utils/constants"
 
 function storeTasksToLocal(localTasks: Task[]) {
   const taskData = localTasks.map(task => ({
@@ -36,8 +35,6 @@ function retrieveLocalTasks(): Task[] {
   }
   return storedTasks;
 }
-
-const PROJECTS_STORAGE_KEY: string = "TO DO App - Projects";
 
 function storeProjectsToLocal(localProjects: Project[]) {
   console.log(localProjects);

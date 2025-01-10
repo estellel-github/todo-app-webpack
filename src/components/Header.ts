@@ -5,7 +5,7 @@ export function Header(): HTMLElement {
   const title = document.createElement('h1');
   title.textContent = '☑️ To Do App';
   title.addEventListener('click', () => {
-    location.reload(); // Reset the app when the title is clicked
+    location.reload();
   });
 
   headerDiv.appendChild(title);

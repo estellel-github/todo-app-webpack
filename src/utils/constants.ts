@@ -15,3 +15,6 @@ export const MODAL_BUTTONS = {
   CANCEL: 'Cancel',
   DELETE: 'Delete',
 };
+
+export const TASKS_STORAGE_KEY: string = "TO DO App - Tasks";
+export const PROJECTS_STORAGE_KEY: string = "TO DO App - Projects";
