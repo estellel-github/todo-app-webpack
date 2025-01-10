@@ -1,5 +1,5 @@
-import { Project } from "./Project";
-import { ProjectDetails } from "./types";
+import { Project } from "../types/ProjectTypes";
+import { ProjectDetails } from "../types/AppTypes";
 
 class ProjectManager {
   private _projects: Project[];

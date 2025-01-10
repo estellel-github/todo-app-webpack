@@ -1,5 +1,5 @@
-import { generateId } from "./generateId";
-import { TaskDetails, Status, Priority } from "./types";
+import { generateId } from "../utils/generateId";
+import { TaskDetails, Status, Priority } from "./AppTypes";
 
 class Task {
   private _id: number;

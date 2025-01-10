@@ -4,11 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "test": "echo \"Error: no test specified\" && exit 1",
-  "build": "webpack --mode production",
-  "predeploy": "pnpm run build",
-  "deploy": "gh-pages -d dist"
-},
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --mode production",
+    "predeploy": "pnpm run build",
+    "deploy": "gh-pages -d dist"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -28,6 +28,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.46.1",
     "date-fns": "^4.1.0",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "zustand": "^5.0.3"
   }
 }

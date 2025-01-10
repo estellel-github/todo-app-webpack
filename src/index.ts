@@ -1,15 +1,15 @@
 import "./styles/styles.css";
-import { Task } from "./modules/Task";
-import { ProjectManager } from "./modules/ProjectManager";
-import { TaskManager } from "./modules/TaskManager";
+import { Task } from "./types/TaskTypes";
+import { ProjectManager } from "./services/ProjectService";
+import { TaskManager } from "./services/TaskService";
 import {
   storeTasksToLocal,
   storeProjectsToLocal,
   retrieveLocalTasks,
   retrieveLocalProjects,
-} from "./modules/LocalStorage";
+} from "./services/LocalStorage";
 
-import { statuses, priorities, Status, Priority } from "./modules/types";
+import { statuses, priorities, Status, Priority } from "./types/AppTypes";
 
 let INBOX_ID = 1;
 
@@ -21,42 +21,25 @@ const projectManager = new ProjectManager();
 const taskManager = new TaskManager();
 
 const moduleContentDiv = document.querySelector("#module-content") as HTMLDivElement;
-
 const modalContentDiv = document.querySelector("#modal-content") as HTMLDivElement;
 
-const sidebar = document.createElement("div");
-sidebar.className = "sidebar";
+const createElement = (tag: string, className: string, textContent?: string) => {
+  const el = document.createElement(tag);
+  el.className = className;
+  if (textContent) el.textContent = textContent;
+  return el;
+};
 
-const filterContainer = document.createElement("div");
-filterContainer.className = "filter-container";
-
-const projectListDiv = document.createElement("div");
-projectListDiv.className = "project-list";
-
-const newProjectDiv = document.createElement("div");
-newProjectDiv.className = "new-project";
-
-const taskListContainer = document.createElement("div");
-taskListContainer.className = "task-list-container";
-
-const createTaskDiv = document.createElement("div");
-createTaskDiv.className = "create-task-div";
-
-const newTaskButton = document.createElement("button");
-newTaskButton.className = "new-task-btn";
-newTaskButton.textContent = "+ New Task";
+const sidebar = createElement("div", "sidebar");
+const filterContainer = createElement("div", "filter-container");
+const projectListDiv = createElement("div", "project-list");
+const newProjectDiv = createElement("div", "new-project");
+const taskListContainer = createElement("div", "task-list-container");
+const createTaskDiv = createElement("div", "create-task-div");
+const newTaskButton = createElement("button", "new-task-btn", "+ New Task");
 
 newTaskButton.addEventListener("click", () => {
   displayCreateTaskDiv();
-});
-
-const header = document.createElement("header");
-const h1 = document.createElement("h1");
-h1.textContent = "✔️ [to do]";
-header.append(h1);
-h1.addEventListener("click", function () {
-  activeProjectId = INBOX_ID;
-  renderPage();
 });
 
 const toggleNewTaskButton = (shouldShow: boolean) => {
@@ -97,14 +80,9 @@ document.addEventListener("mousedown", (event: MouseEvent) => {
   }
 });
 
-const taskListDiv = document.createElement("div");
-taskListDiv.className = "task-list";
-
-const taskPane = document.createElement("div");
-taskPane.className = "task-pane";
-
-const modal = document.createElement("div");
-modal.className = "modal";
+const taskListDiv = createElement("div", "task-list");
+const taskPane = createElement("div", "task-pane");
+const modal = createElement("div", "modal");
 
 const toggleModal = (shouldShow: boolean) => {
   isModalOpen = shouldShow;
@@ -118,22 +96,17 @@ const toggleModal = (shouldShow: boolean) => {
 };
 
 const displayNewProjectContainer = () => {
-  const newProjectButton = document.createElement("button");
-  newProjectButton.className = "new-project-btn";
-  newProjectButton.textContent = "+ Add project";
+  const newProjectButton = createElement("button", "new-project-btn", "+ Add project");
   newProjectDiv.append(newProjectButton);
 
   newProjectButton.addEventListener("click", () => {
     newProjectDiv.removeChild(newProjectButton);
 
-    const projectNameInput = document.createElement("input");
-    projectNameInput.className = "project-name-input";
+    const projectNameInput = createElement("input", "project-name-input") as HTMLInputElement;
     projectNameInput.value = "Untitled Project";
     projectNameInput.type = "text";
 
-    const createProjectButton = document.createElement("button");
-    createProjectButton.className = "create-project-btn";
-    createProjectButton.textContent = "Create";
+    const createProjectButton = createElement("button", "create-project-btn", "Create");
 
     newProjectDiv.appendChild(projectNameInput);
     newProjectDiv.appendChild(createProjectButton);
@@ -156,30 +129,22 @@ const displayNewProjectContainer = () => {
   });
 };
 
-const clearProjectList = () => {
-  projectListDiv.textContent = "";
+const clearContent = (element: HTMLElement) => {
+  element.textContent = "";
 };
 
-function clearTaskList() {
-  taskListDiv.textContent = "";
-}
-
 const renderProjectList = () => {
-  clearProjectList();
+  clearContent(projectListDiv);
   retrieveLocalProjects();
 
   projectManager.projects.forEach((project) => {
-    const projectItemDiv = document.createElement("div");
-    projectItemDiv.className = "project-item";
+    const projectItemDiv = createElement("div", "project-item");
     projectListDiv.append(projectItemDiv);
 
-    const projectInfoDiv = document.createElement("div");
-    projectInfoDiv.className = "project-info";
+    const projectInfoDiv = createElement("div", "project-info");
     projectItemDiv.append(projectInfoDiv);
 
-    const projectNameDiv = document.createElement("div");
-    projectNameDiv.className = "project-name";
-    projectNameDiv.textContent = project.name;
+    const projectNameDiv = createElement("div", "project-name", project.name);
     projectInfoDiv.append(projectNameDiv);
 
     const numTodoTasksDiv = document.createElement("div");
@@ -299,7 +264,7 @@ const displayDeleteProjectModal = (projectId: number) => {
 };
 
 const displayTasks = (tabName: string, tasks: Task[]) => {
-  clearTaskList();
+  clearContent(taskListDiv);
   const taskListHeader = document.createElement("h2");
   taskListHeader.className = "task-list-header";
   taskListHeader.textContent = tabName;
@@ -543,7 +508,7 @@ const displayDeleteTaskModal = (taskId: number) => {
 
 const displayTaskPane = (taskId: number) => {
   let task = taskManager.getTask(taskId);
-  if (!task) return; // Or throw error
+  if (!task) return;
 
   taskPane.textContent = "";
 
@@ -785,6 +750,15 @@ const listTasks = () => {
 listTasks();
 
 const initializeLayout = () => {
+  const header = createElement("header", "");
+  const h1 = createElement("h1", "", "✔️ [to do]");
+
+  header.append(h1);
+  h1.addEventListener("click", function () {
+    activeProjectId = INBOX_ID;
+    renderPage();
+  });
+
   moduleContentDiv.textContent = "";
   sidebar.append(projectListDiv);
   sidebar.append(newProjectDiv);

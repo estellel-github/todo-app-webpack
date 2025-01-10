@@ -1,6 +1,6 @@
-import { Task } from "./Task";
-import { Project } from "./Project";
-import { TaskDetails, ProjectDetails } from "./types";
+import { Task } from "../types/TaskTypes";
+import { Project } from "../types/ProjectTypes";
+import { TaskDetails, ProjectDetails } from "../types/AppTypes";
 
 const TASKS_STORAGE_KEY: string = "TO DO App - Tasks";
 
