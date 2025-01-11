@@ -2,6 +2,7 @@ import { createElement } from '../utils/domUtils';
 import { useAppState } from '../state/AppState';
 import { taskService } from '../services/TaskService';
 import { projectService } from '../services/ProjectService';
+import { ProjectOptions } from './ProjectOptions';
 
 export function ProjectContainer(): HTMLElement {
   const projectContainerEl = createElement('div', 'project-container', '');
@@ -14,15 +15,12 @@ export function ProjectContainer(): HTMLElement {
 
     projects.forEach((project) => {
       const projectItemEl = createElement('div', 'project-item', '');
-
-      const projectInfoEl = createElement(
-        'div',
-        'project-info',
-        ''
-      );
-      projectInfoEl.id = `project-item-${project.id}`;
-
+      const projectInfoEl = createElement('div', 'project-info', '');
       const projectNameEl = createElement('div', 'project-name', project.name);
+
+      projectInfoEl.id = `project-info-${project.id}`;
+      projectItemEl.id = `project-item-${project.id}`;
+      projectNameEl.id = `project-name-${project.id}`;
 
       const numTasksEl = createElement(
         'div',
@@ -35,55 +33,20 @@ export function ProjectContainer(): HTMLElement {
       projectInfoEl.appendChild(numTasksEl);
 
       projectItemEl.appendChild(projectInfoEl);
-      projectContainerEl.appendChild(projectItemEl);
 
       if (project.id !== 1) {
-        const projectOptionsEl = createElement(
-          'div',
-          'project-options',
-          ''
-        );
-        projectOptionsEl.id = `project-options-${project.id}`;
-
-        const editBtn = createElement('button', 'edit-btn', '✏️');
-        editBtn.addEventListener('click', () => handleEditProject(project.id));
-        projectOptionsEl.appendChild(editBtn);
-
-        const deleteBtn = createElement('button', 'delete-btn', '🗑️');
-        deleteBtn.addEventListener('click', () => handleDeleteProject(project.id));
-        projectOptionsEl.appendChild(deleteBtn);
-
+        const projectOptionsEl = ProjectOptions(project);
+        console.log(projectOptionsEl);
         projectItemEl.appendChild(projectOptionsEl);
       }
 
-
-
-      projectInfoEl.addEventListener('click', () => {
+      projectItemEl.addEventListener('click', () => {
         useAppState.getState().setActiveProjectId(project.id);
         useAppState.getState().setViewType('project');
       });
 
-
+      projectContainerEl.appendChild(projectItemEl);
     });
-  };
-
-  const handleEditProject = (projectId: number) => {
-    const projectName = prompt('Edit project name:');
-    if (projectName) {
-      projectService.renameProject(projectId, projectName);
-      useAppState.getState().triggerUpdate();
-    }
-  };
-
-  const handleDeleteProject = (projectId: number) => {
-    const confirmation = confirm(
-      'This project and all its tasks will be deleted permanently. Are you sure?'
-    );
-    if (confirmation) {
-      taskService.deleteAllTasksInProject(projectId);
-      projectService.deleteProject(projectId);
-      useAppState.getState().triggerUpdate();
-    }
   };
 
   useAppState.getState().subscribeToStateChange(() => {
