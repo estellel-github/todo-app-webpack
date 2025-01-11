@@ -21,3 +21,6 @@ export const priorities = ["Low", "High"] as const;
 
 export type Priority = typeof priorities[number];
 
+export const filters = ['📋 All Tasks', '🔥 Due Today', '🗓️ Due This Week'] as const;
+
+export type Filter = typeof filters[number];
