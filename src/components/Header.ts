@@ -3,7 +3,7 @@ export function Header(): HTMLElement {
   headerDiv.className = 'header';
 
   const title = document.createElement('h1');
-  title.textContent = '☑️ To Do App';
+  title.textContent = '☑️ To Do';
   title.addEventListener('click', () => {
     location.reload();
   });
