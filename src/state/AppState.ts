@@ -1,11 +1,12 @@
 import { createStore } from 'zustand/vanilla'; // Changed from 'zustand'
-import { Filter } from '../types/AppTypes';
+import { Filter, ViewType, ModalMode } from '../types/AppTypes';
 
 type AppState = {
   activeProjectId: number;
-  currentViewType: 'project' | 'filter';
+  currentViewType: ViewType;
   currentFilter: Filter;
   isModalOpen: boolean;
+  modalMode: ModalMode;
   isTaskPaneOpen: boolean;
   activeTaskId: number | null;
   isNewTaskButtonVisible: boolean;
@@ -13,10 +14,10 @@ type AppState = {
   editProjectId: number | null;
   needsUpdate: boolean;
   setActiveProjectId: (id: number) => void;
-  setViewType: (viewType: 'project' | 'filter') => void;
+  setViewType: (viewType: ViewType) => void;
   setFilter: (filter: Filter) => void;
-  toggleModal: (isOpen: boolean) => void;
-  toggleTaskPane: (isOpen: boolean, taskId?: number | null) => void;
+  toggleModal: (isOpen: boolean, mode: ModalMode) => void;
+  toggleTaskPane: (isOpen: boolean, taskId: number | null) => void;
   setActiveTaskId: (taskId: number | null) => void;
   toggleNewTaskBtn: (isVisible: boolean) => void;
   toggleAddProject: (isVisible: boolean) => void;
@@ -30,6 +31,7 @@ export const useAppState = createStore<AppState>((set) => ({
   currentViewType: 'project',
   currentFilter: '📋 All Tasks',
   isModalOpen: false,
+  modalMode: null,
   isTaskPaneOpen: false,
   activeTaskId: null,
   isNewTaskButtonVisible: true,
@@ -39,7 +41,8 @@ export const useAppState = createStore<AppState>((set) => ({
   setActiveProjectId: (id) => set({ activeProjectId: id }),
   setViewType: (viewType) => set({ currentViewType: viewType }),
   setFilter: (filter) => set({ currentFilter: filter }),
-  toggleModal: (isOpen) => set({ isModalOpen: isOpen }),
+  toggleModal: (isOpen, mode = null) =>
+    set({ isModalOpen: isOpen, modalMode: mode }),
   toggleTaskPane: (isOpen, taskId = null) =>
     set({ isTaskPaneOpen: isOpen, activeTaskId: taskId }),
   setActiveTaskId: (taskId) => set({ activeTaskId: taskId }),
@@ -53,5 +56,5 @@ export const useAppState = createStore<AppState>((set) => ({
     })),
   subscribeToStateChange: (callback: () => void) => {
     useAppState.subscribe(callback);
-  }
+  },
 }));
