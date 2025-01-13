@@ -96,3 +96,11 @@ export function createTextareaField(className: string, value: string): HTMLTextA
   textarea.value = value;
   return textarea;
 }
+
+export const createLabeledField = (labelText: string, field: HTMLElement): HTMLElement => {
+  const container = createElement('div', 'field-container', '');
+  const label = createElement('label', 'field-label', labelText);
+  container.appendChild(label);
+  container.appendChild(field);
+  return container;
+};
