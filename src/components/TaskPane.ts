@@ -44,8 +44,9 @@ export function TaskPane(): HTMLElement {
   taskPaneEl.appendChild(deleteTaskButtonEl);
 
   const hideTaskPane = () => {
+    const activeTaskId = useAppState.getState().activeTaskId;
     taskPaneEl.style.display = 'none';
-    useAppState.getState().toggleTaskPane(false, null);
+    useAppState.getState().toggleTaskPane(false, activeTaskId);
     safeQuerySelector('#task-list-container').classList.remove("blurred");
   };
 
@@ -114,7 +115,6 @@ export function TaskPane(): HTMLElement {
 
   const handleClickOutside = (event: MouseEvent) => {
     if (!taskPaneEl.contains(event.target as Node) && taskPaneEl.style.display === 'block') {
-      console.log('Clicked outside task pane, hiding it.');
       hideTaskPane();
     }
     safeQuerySelector('#task-list-container').classList.remove("blurred");
@@ -129,16 +129,13 @@ export function TaskPane(): HTMLElement {
     if (taskId) {
       deleteTask(taskId);
     } else {
-      console.error('No active task ID available for deletion.');
     }
   });
 
   document.addEventListener('mousedown', handleClickOutside);
 
   useAppState.getState().subscribeToStateChange(() => {
-    console.log('Subscription triggering render: task pane');
-    if (useAppState.getState().isTaskPaneOpen === true
-    ) {
+    if (useAppState.getState().isTaskPaneOpen === true) {
       populateTaskPane();
       safeQuerySelector('#task-list-container').classList.add("blurred");
     }
