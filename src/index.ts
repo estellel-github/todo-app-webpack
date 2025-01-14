@@ -21,8 +21,8 @@ function initializeApp() {
     return;
   }
 
-  const header = Header();
-  headerEl.appendChild(header);
+  const headerTitle = Header();
+  headerEl.appendChild(headerTitle);
 
   const sidebar = Sidebar();
   mainModuleEl.appendChild(sidebar);
