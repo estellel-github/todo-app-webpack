@@ -3,7 +3,7 @@ import { useAppState } from '../state/AppState';
 import { taskService } from '../services/TaskService';
 import { projectService } from '../services/ProjectService';
 import { storeProjectsToLocal, storeTasksToLocal } from '../services/LocalStorage';
-import { MESSAGES } from '../utils/constants';
+import { MESSAGES, BUTTONS_TXT } from '../utils/constants';
 
 export function Modal(): HTMLElement {
   const modalEl = createElement('div', 'modal', '');
@@ -13,10 +13,10 @@ export function Modal(): HTMLElement {
   const modalMsgEl = createElement('div', 'modal-msg', '');
   modalMsgEl.id = 'modal-msg';
 
-  const confirmBtnEl = createElement('button', 'confirm-btn', 'Confirm');
+  const confirmBtnEl = createElement('button', 'delete-btn', BUTTONS_TXT.DELETE);
   confirmBtnEl.id = 'confirm-btn';
 
-  const cancelBtnEl = createElement('button', 'cancel-btn', 'Cancel');
+  const cancelBtnEl = createElement('button', 'cancel-btn', BUTTONS_TXT.CANCEL);
   cancelBtnEl.id = 'cancel-btn';
 
   modalEl.appendChild(modalMsgEl);
