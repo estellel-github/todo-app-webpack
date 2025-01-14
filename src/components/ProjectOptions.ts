@@ -3,7 +3,7 @@ import { useAppState } from '../state/AppState';
 import { projectService } from '../services/ProjectService';
 import { Project } from '../types/ProjectTypes';
 import { storeProjectsToLocal } from '../services/LocalStorage';
-import { MESSAGES } from "../utils/constants"
+import { BUTTONS_TXT, MESSAGES } from "../utils/constants"
 
 export function ProjectOptions(project: Project): HTMLElement {
   const projectOptionsEl = createElement('div', 'project-options', '');
@@ -19,9 +19,9 @@ export function ProjectOptions(project: Project): HTMLElement {
   projectNameInputEl.value = project.name;
   inputContainer.appendChild(projectNameInputEl);
 
-  const editBtn = createElement('button', 'edit-btn', '✏️');
-  const saveBtn = createElement('button', 'save-btn display-none', '💾');
-  const deleteBtn = createElement('button', 'delete-btn', '🗑️');
+  const editBtn = createElement('button', 'edit-btn', BUTTONS_TXT.EDIT_ICON);
+  const saveBtn = createElement('button', 'save-btn display-none', BUTTONS_TXT.SAVE_ICON);
+  const deleteBtn = createElement('button', 'delete-btn', BUTTONS_TXT.DELETE_ICON);
 
   const enterEditMode = () => {
     isEditing = true;
@@ -41,6 +41,7 @@ export function ProjectOptions(project: Project): HTMLElement {
 
       editBtn.classList.add('display-none');
       saveBtn.classList.remove('display-none');
+      deleteBtn.classList.add('display-none');
     }
   };
 
@@ -57,6 +58,7 @@ export function ProjectOptions(project: Project): HTMLElement {
 
       editBtn.classList.remove('display-none');
       saveBtn.classList.add('display-none');
+      deleteBtn.classList.remove('display-none');
     }
   };
 
