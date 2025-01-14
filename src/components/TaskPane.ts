@@ -3,13 +3,15 @@ import { useAppState } from '../state/AppState';
 import { taskService } from '../services/TaskService';
 import { Task } from '../types/TaskTypes';
 import { storeTasksToLocal } from '../services/LocalStorage';
+import { BUTTONS_TXT, DEFAULT_TXT } from '../utils/constants';
+import { Priority, Status, priorities, statuses } from '../types/AppTypes';
 
 export function TaskPane(): HTMLElement {
   const taskPaneEl = createElement('div', 'task-pane', '');
   taskPaneEl.id = 'task-pane';
   taskPaneEl.style.display = 'none';
 
-  const titleInput = createInputField('task-title', 'New Task');
+  const titleInput = createInputField('task-title', DEFAULT_TXT.NEW_TASK_TITLE);
   const titleField = createLabeledField('Task Name', titleInput);
 
   const statusSelect = createSelectField('task-status', ['To do', 'Done'], 'To do');
@@ -24,13 +26,16 @@ export function TaskPane(): HTMLElement {
   const notesTextarea = createTextareaField('notes', 'Add notes here...');
   const notesField = createLabeledField('Notes', notesTextarea);
 
-  const saveTaskButtonEl = createElement('button', 'save-task-btn', 'Create Task');
+  const taskOptionsEl = createElement('div', 'task-options-el');
+  taskOptionsEl.id = 'task-options-el';
+
+  const saveTaskButtonEl = createElement('button', 'save-task-btn', BUTTONS_TXT.CREATE_TASK);
   saveTaskButtonEl.id = 'save-task-btn';
 
-  const cancelTaskButtonEl = createElement('button', 'cancel-task-btn', 'Cancel');
+  const cancelTaskButtonEl = createElement('button', 'cancel-task-btn', BUTTONS_TXT.CANCEL);
   cancelTaskButtonEl.id = 'cancel-task-btn';
 
-  const deleteTaskButtonEl = createElement('button', 'delete-task-btn', '🗑 Delete Task');
+  const deleteTaskButtonEl = createElement('button', 'delete-task-btn', BUTTONS_TXT.DELETE);
   deleteTaskButtonEl.id = 'delete-task-btn';
   deleteTaskButtonEl.style.display = 'none';
 
@@ -39,9 +44,10 @@ export function TaskPane(): HTMLElement {
   taskPaneEl.appendChild(priorityField);
   taskPaneEl.appendChild(dueDateField);
   taskPaneEl.appendChild(notesField);
-  taskPaneEl.appendChild(saveTaskButtonEl);
-  taskPaneEl.appendChild(cancelTaskButtonEl);
-  taskPaneEl.appendChild(deleteTaskButtonEl);
+  taskOptionsEl.appendChild(saveTaskButtonEl);
+  taskOptionsEl.appendChild(deleteTaskButtonEl);
+  taskOptionsEl.appendChild(cancelTaskButtonEl);
+  taskPaneEl.appendChild(taskOptionsEl);
 
   const hideTaskPane = () => {
     const activeTaskId = useAppState.getState().activeTaskId;
@@ -56,29 +62,28 @@ export function TaskPane(): HTMLElement {
     const taskDetails = {
       id: activeTaskId || Date.now(),
       projectId: useAppState.getState().activeProjectId || 1,
-      status: statusSelect.value as 'To do' | 'Done',
+      status: statusSelect.value as Status,
       title: titleInput.value,
       dueDate: new Date(dueDateInput.value),
-      priority: prioritySelect.value as 'Low' | 'High',
+      priority: prioritySelect.value as Priority,
       notes: notesTextarea.value,
     };
 
     if (activeTaskId) {
       const updatedTask = new Task(taskDetails);
       if (!updatedTask.title) {
-        updatedTask.title = taskService.getTask(activeTaskId)?.title || "Default Task Title";
+        updatedTask.title = taskService.getTask(activeTaskId)?.title || DEFAULT_TXT.DEFAULT_TASK_TITLE;
       }
 
       taskService.updateTask(activeTaskId, updatedTask);
     } else {
       const newTask = new Task(taskDetails)
       if (!newTask.title) {
-        newTask.title = "New Task";
+        newTask.title = DEFAULT_TXT.NEW_TASK_TITLE;
       }
       taskService.addTask(newTask);
       storeTasksToLocal(taskService.getAllTasks());
     }
-    console.log("Triggering state update: task created or edited");
     useAppState.getState().triggerUpdate();
     hideTaskPane();
   };
@@ -99,16 +104,16 @@ export function TaskPane(): HTMLElement {
         dueDateInput.value = task.dueDate.toISOString().split('T')[0];
         notesTextarea.value = task.notes;
         deleteTaskButtonEl.style.display = 'block';
-        saveTaskButtonEl.textContent = 'Save Task';
+        saveTaskButtonEl.textContent = BUTTONS_TXT.SAVE;
       }
     } else {
       titleInput.value = 'New Task';
-      statusSelect.value = 'To do';
-      prioritySelect.value = 'High';
+      statusSelect.value = statuses[0]; // To Do
+      prioritySelect.value = priorities[1]; // High
       dueDateInput.value = new Date().toISOString().split('T')[0];
-      notesTextarea.value = 'Add notes here...';
+      notesTextarea.value = DEFAULT_TXT.NOTES_TXT;
       deleteTaskButtonEl.style.display = 'none';
-      saveTaskButtonEl.textContent = 'Create Task';
+      saveTaskButtonEl.textContent = BUTTONS_TXT.CREATE_TASK;
     }
     taskPaneEl.style.display = 'block';
   };
