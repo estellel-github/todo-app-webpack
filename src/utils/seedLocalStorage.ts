@@ -1,9 +1,10 @@
 import { storeProjectsToLocal, storeTasksToLocal } from "../services/LocalStorage"
 import { Project } from '../types/ProjectTypes';
 import { Task } from "../types/TaskTypes";
+import { INBOX_NAME } from "./constants";
 
 const seedProjects = [
-  { id: 1, name: "🏠 Inbox" },
+  { id: 1, name: INBOX_NAME },
   { id: 2, name: "Work" },
   { id: 3, name: "Personal" },
   { id: 4, name: "Shopping List" },
