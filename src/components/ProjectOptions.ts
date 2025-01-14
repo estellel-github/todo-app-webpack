@@ -1,7 +1,6 @@
 import { createElement } from '../utils/domUtils';
 import { useAppState } from '../state/AppState';
 import { projectService } from '../services/ProjectService';
-import { taskService } from '../services/TaskService';
 import { Project } from '../types/ProjectTypes';
 import { storeProjectsToLocal } from '../services/LocalStorage';
 import { MESSAGES } from "../utils/constants"
@@ -71,21 +70,15 @@ export function ProjectOptions(project: Project): HTMLElement {
     if (newName) {
       projectService.renameProject(project.id, newName);
       storeProjectsToLocal(projectService.projects);
+      console.log("Triggering state update: new project saved");
       useAppState.getState().triggerUpdate();
     }
     exitEditMode();
   };
 
   const deleteProject = () => {
-    const confirmation = confirm(
-      'This project and all its tasks will be deleted permanently. Are you sure?'
-    );
-    if (confirmation) {
-      taskService.deleteAllTasksInProject(project.id);
-      projectService.deleteProject(project.id);
-      storeProjectsToLocal(projectService.projects)
-      useAppState.getState().triggerUpdate();
-    }
+    useAppState.getState().setActiveProjectId(project.id);
+    useAppState.getState().toggleModal(true, 'project-deletion');
   };
 
   editBtn.addEventListener('click', (e) => {
