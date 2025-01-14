@@ -5,14 +5,14 @@ import {
   retrieveLocalTasks,
   retrieveLocalProjects,
 } from "../services/LocalStorage";
-// import { seedLocalStorage } from "../utils/seedLocalStorage"
+import { seedLocalStorage } from "../utils/seedLocalStorage"
 import { ProjectDetails, TaskDetails } from '../types/AppTypes';
-import { INBOX_ID } from "../utils/constants";
+import { INBOX_ID, INBOX_NAME } from "../utils/constants";
 
-// seedLocalStorage();
+seedLocalStorage();
 
 const listProjects = () => {
-  projectService.addProject({ id: INBOX_ID, name: "🏠 Inbox" });
+  projectService.addProject({ id: INBOX_ID, name: INBOX_NAME });
   let storedProjectArray = retrieveLocalProjects();
   if (storedProjectArray && storedProjectArray.length > 0) {
     storedProjectArray.forEach((projectData: ProjectDetails) => {
