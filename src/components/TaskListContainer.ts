@@ -2,8 +2,9 @@ import { createElement } from '../utils/domUtils';
 import { useAppState } from '../state/AppState';
 import { taskService } from '../services/TaskService';
 import { projectService } from '../services/ProjectService';
-import { MESSAGES } from '../utils/constants';
+import { BUTTONS_TXT, DEFAULT_TXT, MESSAGES } from '../utils/constants';
 import { clearContent } from '../utils/domUtils';
+import { filters as filterNames, statuses } from '../types/AppTypes'
 
 export function TaskListContainer(): HTMLElement {
   const taskListContainerEl = createElement('div', 'task-list-container', '');
@@ -12,14 +13,14 @@ export function TaskListContainer(): HTMLElement {
   const taskListHeaderEl = createElement('h3', 'task-list-header', '');
   taskListHeaderEl.id = 'task-list-header';
 
-  const newTaskBtnEl = createElement('button', 'new-task-btn', '+ New Task');
+  const newTaskBtnEl = createElement('button', 'new-task-btn', BUTTONS_TXT.ADD_TASK);
   newTaskBtnEl.id = 'new-task-btn';
   newTaskBtnEl.style.display = 'none';
 
   const taskListEl = createElement('div', 'task-list', '');
   taskListEl.id = 'task-list';
 
-  const collapsibleHeaderEl = createElement('h3', 'collapsible-header', '▶ Done');
+  const collapsibleHeaderEl = createElement('h4', 'collapsible-header', DEFAULT_TXT.DONE_HEADER_CLOSED);
   collapsibleHeaderEl.id = 'collapsible-header';
   collapsibleHeaderEl.style.cursor = 'pointer';
 
@@ -28,7 +29,7 @@ export function TaskListContainer(): HTMLElement {
 
   collapsibleHeaderEl.addEventListener("click", () => {
     collapsibleHeaderEl.textContent =
-      collapsibleHeaderEl.textContent === "▼ Done" ? "▶ Done" : "▼ Done";
+      collapsibleHeaderEl.textContent === DEFAULT_TXT.DONE_HEADER_OPEN ? DEFAULT_TXT.DONE_HEADER_CLOSED : DEFAULT_TXT.DONE_HEADER_OPEN;
     doneTasksContainer.style.display =
       doneTasksContainer.style.display === "none" ? "block" : "none";
   });
@@ -51,9 +52,9 @@ export function TaskListContainer(): HTMLElement {
 
     const tasks = isProjectView
       ? taskService.getTasksByProject(activeProjectId)
-      : currentFilter === '📋 All Tasks'
+      : currentFilter === filterNames[0] // Filter all
         ? taskService.getAllTasks()
-        : currentFilter === '🔥 Due Today'
+        : currentFilter === filterNames[1] // Filter due today
           ? taskService.getTasksDueToday()
           : taskService.getTasksDueThisWeek();
 
@@ -64,8 +65,8 @@ export function TaskListContainer(): HTMLElement {
     clearContent(taskListEl);
     clearContent(doneTasksContainer);
 
-    const doneTasks = tasks.filter((task) => task.status === 'Done');
-    const toDoTasks = tasks.filter((task) => task.status === 'To do');
+    const doneTasks = tasks.filter((task) => task.status === statuses[1]);
+    const toDoTasks = tasks.filter((task) => task.status === statuses[0]);
 
     if (toDoTasks.length === 0) {
       const emptyList = createElement('div', 'empty-list', MESSAGES.EMPTY_PROJECT_MSG);
@@ -92,14 +93,23 @@ export function TaskListContainer(): HTMLElement {
 
         checkbox.addEventListener('click', (e) => {
           e.stopPropagation();
-          task.status = 'Done';
+          task.status = statuses[1]; // Done
           taskService.updateTask(task.id, task);
           useAppState.getState().triggerUpdate();
         });
 
-        taskItemEl.prepend(checkbox);
-        taskItemEl.appendChild(taskNameEl);
+        const taskTopEl = createElement('div', 'task-top');
+        taskTopEl.id = `task-top-${task.id}`;
+
+        const taskBottomEl = createElement('div', 'task-bottom');
+        taskTopEl.id = `task-bottom-${task.id}`;
+
+        taskTopEl.prepend(checkbox);
+        taskTopEl.appendChild(taskNameEl);
+        taskItemEl.appendChild(taskTopEl);
+        taskItemEl.appendChild(taskBottomEl);
         taskListEl.appendChild(taskItemEl);
+
       });
     }
 
@@ -118,7 +128,7 @@ export function TaskListContainer(): HTMLElement {
 
         checkbox.addEventListener('click', (e) => {
           e.stopPropagation();
-          task.status = 'To do';
+          task.status = statuses[0]; // To do
           taskService.updateTask(task.id, task);
           useAppState.getState().triggerUpdate();
         });
