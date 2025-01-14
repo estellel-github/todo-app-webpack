@@ -1,12 +1,9 @@
 import { APP_NAME } from "../utils/constants";
+import { createElement } from "../utils/domUtils";
 
 export function Header(): HTMLElement {
-  const headerDiv = document.createElement('header');
-  headerDiv.className = 'header';
+  const headerTitle = createElement('h1', 'title');
+  headerTitle.textContent = APP_NAME;
 
-  const title = document.createElement('h1');
-  title.textContent = APP_NAME;
-
-  headerDiv.appendChild(title);
-  return headerDiv;
+  return headerTitle;
 }
