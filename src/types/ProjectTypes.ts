@@ -1,5 +1,5 @@
-import { generateId } from "./generateId";
-import { ProjectDetails } from "./types";
+import { generateId } from "../utils/generateId";
+import { ProjectDetails } from "./AppTypes";
 
 class Project {
   private _id: number;

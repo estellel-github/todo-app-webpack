@@ -1,0 +1,19 @@
+#module-content
+├── header
+│   └── h1 (✔️ [to do])
+├── .sidebar
+│   ├── .filter-container (Task Filters)
+│   ├── .project-list (Project List)
+│   └── .new-project (+ Add Project)
+├── .task-list-container
+│   ├── .new-task-btn (+ New Task Button)
+│   └── .task-list
+│       ├── .task-item (To Do Tasks)
+│       └── .done-tasks-container (Done Tasks)
+├── .task-pane
+│   └── Task Editing/Creation Form (Dynamic Content)
+#modal-content
+└── .modal
+    ├── Confirmation Message
+    ├── Confirm Button
+    └── Cancel Button

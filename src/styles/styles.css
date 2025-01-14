@@ -16,7 +16,7 @@ body {
   align-items: center;
 }
 
-#module-content {
+#main-module {
   display: grid;
   grid-template-rows: auto 1fr;
   grid-template-columns: 1fr 3fr 2fr;
@@ -26,7 +26,6 @@ body {
   height: 100vh;
   max-width: 875px;
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
-  /* Subtle shadow */
 }
 
 header {
@@ -100,6 +99,28 @@ header {
   display: flex;
 }
 
+.project-name-input-container {
+  flex: 1;
+  margin-right: 8px;
+}
+
+.project-name-input {
+  width: 100%;
+  margin: 0;
+  padding: 2px 8px;
+}
+
+.project-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.project-name {
+  flex: 1;
+}
+
 .task-list-container {
   grid-area: task-list-container;
   min-width: 320px;
@@ -129,6 +150,11 @@ header {
 .task-item {
   display: flex;
   gap: 10px;
+}
+
+.task-item.done {
+  text-decoration: line-through;
+  color: #6c757d;
 }
 
 .display-none {
@@ -162,7 +188,7 @@ button:hover {
 }
 
 .blurred {
-  filter: blur(5px);
+  filter: blur(2px);
   pointer-events: none;
 }
 
@@ -185,41 +211,29 @@ select {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Styling on hover */
 input[type="text"]:hover,
 input[type="password"]:hover,
 textarea:hover {
   border-color: #aaa;
-  /* Slightly darker border on hover */
 }
 
-/* Styling on focus */
 input[type="text"]:focus,
 input[type="password"]:focus,
 textarea:focus {
   border-color: #007BFF;
-  /* Border color on focus */
   background-color: #fff;
-  /* Slightly lighter background on focus */
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-  /* Blue focus glow */
 }
 
-/* Optional placeholder styling */
 input::placeholder,
 textarea::placeholder {
   color: #aaa;
-  /* Subtle placeholder text */
   font-style: italic;
-  /* Optional styling */
 }
 
-/* For textarea specifically */
 textarea {
   resize: vertical;
-  /* Allow vertical resizing only */
   min-height: 100px;
-  /* Minimum height for textareas */
 }
 
 .new-project {
@@ -227,6 +241,45 @@ textarea {
   justify-content: end;
 }
 
-.new-project-btn {
+.add-project-btn {
   width: 100%;
+}
+
+.button-container {
+  display: flex;
+  justify-content: left;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.create-project-btn,
+.cancel-project-btn {
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+}
+
+.create-project-btn {
+  background-color: #4caf50;
+  /* Green */
+  color: white;
+}
+
+.cancel-project-btn {
+  background-color: #f44336;
+  /* Red */
+  color: white;
+}
+
+.field-container {
+  margin-bottom: 15px;
+}
+
+.field-label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+  font-size: 14px;
 }

@@ -5,7 +5,7 @@ A modular, dynamic task management app.
 Built with **JavaScript/TypeScript**, leveraging **Webpack** for bundling, and deployed using **gh-pages**.
 This project was done as part of **The Odin Project Curriculum**.
 
-![Screenshot for To Do App](image.png)
+![Screenshot for To Do App](image_.png)
 
 🔗 Live demo: https://estellel-github.github.io/todo-app-webpack/
 

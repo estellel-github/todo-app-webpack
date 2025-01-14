@@ -1,7 +1,7 @@
-import { Task } from "./Task";
+import { Task } from "../types/TaskTypes";
 import { startOfWeek, endOfWeek, isWithinInterval } from "date-fns";
 
-class TaskManager {
+class TaskService {
 
   private _tasks: Task[];
 
@@ -67,4 +67,4 @@ class TaskManager {
   }
 }
 
-export { TaskManager };
+export const taskService = new TaskService();
