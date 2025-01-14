@@ -3,6 +3,8 @@ import { useAppState } from '../state/AppState';
 import { taskService } from '../services/TaskService';
 import { filters, Filter } from '../types/AppTypes';
 
+
+
 export function FilterContainer(): HTMLElement {
   const filterContainerEl = createElement('div', 'filter-container', '');
   filterContainerEl.id = 'filter-container';
@@ -20,9 +22,9 @@ export function FilterContainer(): HTMLElement {
       const numTasksEl = createElement('div', 'num-tasks', '');
       numTasksEl.id = `num-tasks-${filter}`;
 
-      const tasks = filter === '📋 All Tasks'
+      const tasks = filter === filters[0]
         ? taskService.getAllTasks()
-        : filter === '🔥 Due Today'
+        : filter === filters[1]
           ? taskService.getTasksDueToday()
           : taskService.getTasksDueThisWeek();
 
