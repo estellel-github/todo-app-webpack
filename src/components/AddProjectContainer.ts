@@ -1,7 +1,7 @@
 import { createElement } from '../utils/domUtils';
 import { useAppState } from '../state/AppState';
 import { projectService } from '../services/ProjectService';
-import { MESSAGES } from "../utils/constants";
+import { BUTTONS_TXT, DEFAULT_TXT, MESSAGES } from "../utils/constants";
 import { storeProjectsToLocal } from "../services/LocalStorage";
 
 export function AddProjectContainer(): HTMLElement {
@@ -10,23 +10,23 @@ export function AddProjectContainer(): HTMLElement {
 
   let isAddingProject = false;
 
-  const addProjectBtnEl = createElement('button', 'add-project-btn', '+ Add Project');
+  const addProjectBtnEl = createElement('button', 'add-project-btn', BUTTONS_TXT.ADD_PROJECT);
   addProjectBtnEl.id = 'add-project-btn';
 
   const projectNameInputEl = createElement('input', 'project-name-input', '') as HTMLInputElement;
   projectNameInputEl.id = 'project-name-input';
   projectNameInputEl.type = 'text';
-  projectNameInputEl.placeholder = 'New Project Name';
+  projectNameInputEl.placeholder = DEFAULT_TXT.NEW_PROJECT_NAME;
   projectNameInputEl.style.display = 'none';
 
   const buttonContainerEl = createElement('div', 'button-container', '');
   buttonContainerEl.id = 'button-container';
   buttonContainerEl.style.display = 'none';
 
-  const createProjectBtnEl = createElement('button', 'create-project-btn', 'Create');
+  const createProjectBtnEl = createElement('button', 'create-project-btn', BUTTONS_TXT.CREATE_PROJECT);
   createProjectBtnEl.id = 'create-project-btn';
 
-  const cancelProjectBtnEl = createElement('button', 'cancel-project-btn', 'Cancel');
+  const cancelProjectBtnEl = createElement('button', 'cancel-project-btn', BUTTONS_TXT.CANCEL);
   cancelProjectBtnEl.id = 'cancel-project-btn';
 
   buttonContainerEl.appendChild(createProjectBtnEl);
