@@ -1,13 +1,15 @@
-import { createElement, clearContent } from '../utils/domUtils';
+import { createElement } from '../utils/domUtils';
 import { useAppState } from '../state/AppState';
 import { taskService } from '../services/TaskService';
 import { projectService } from '../services/ProjectService';
+import { MESSAGES } from '../utils/constants';
+import { clearContent } from '../utils/domUtils';
 
 export function TaskListContainer(): HTMLElement {
   const taskListContainerEl = createElement('div', 'task-list-container', '');
   taskListContainerEl.id = 'task-list-container';
 
-  const taskListHeaderEl = createElement('div', 'task-list-header', '');
+  const taskListHeaderEl = createElement('h3', 'task-list-header', '');
   taskListHeaderEl.id = 'task-list-header';
 
   const newTaskBtnEl = createElement('button', 'new-task-btn', '+ New Task');
@@ -39,9 +41,13 @@ export function TaskListContainer(): HTMLElement {
 
   const renderTaskList = () => {
     const { activeProjectId, currentFilter } = useAppState.getState();
-    const isProjectView = activeProjectId !== null;
+    const isProjectView = useAppState.getState().currentViewType === "project";
 
     newTaskBtnEl.style.display = isProjectView ? 'block' : 'none';
+    newTaskBtnEl.addEventListener('click', () => {
+      useAppState.getState().toggleTaskPane(true, null);
+      useAppState.getState().triggerUpdate();
+    });
 
     const tasks = isProjectView
       ? taskService.getTasksByProject(activeProjectId)
@@ -61,24 +67,42 @@ export function TaskListContainer(): HTMLElement {
     const doneTasks = tasks.filter((task) => task.status === 'Done');
     const toDoTasks = tasks.filter((task) => task.status === 'To do');
 
-    toDoTasks.forEach((task) => {
-      const taskItemEl = createElement('div', 'task-item', task.title);
-      taskItemEl.classList.add('to-do');
-      taskItemEl.id = `task-item-${task.id}`;
+    if (toDoTasks.length === 0) {
+      const emptyList = createElement('div', 'empty-list', MESSAGES.EMPTY_PROJECT_MSG);
+      taskListEl.appendChild(emptyList);
+    } else {
+      toDoTasks.forEach((task) => {
+        const taskItemEl = createElement('div', 'task-item');
+        taskItemEl.classList.add('to-do');
+        taskItemEl.id = `task-item-${task.id}`;
 
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.className = 'task-checkbox';
-      checkbox.checked = false;
-      checkbox.addEventListener('click', () => {
-        task.status = 'Done';
-        taskService.updateTask(task.id, task);
-        useAppState.getState().triggerUpdate();
+        const taskNameEl = createElement('div', 'task-name', task.title);
+        taskItemEl.id = `task-name-${task.id}`;
+
+        taskNameEl.addEventListener('click', (e) => {
+          e.stopPropagation();
+          useAppState.getState().toggleTaskPane(true, task.id);
+          useAppState.getState().triggerUpdate();
+        })
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'task-checkbox';
+        checkbox.checked = false;
+
+        checkbox.addEventListener('click', (e) => {
+          e.stopPropagation();
+          task.status = 'Done';
+          taskService.updateTask(task.id, task);
+          useAppState.getState().triggerUpdate();
+        });
+
+        taskItemEl.prepend(checkbox);
+        taskItemEl.appendChild(taskNameEl);
+        taskListEl.appendChild(taskItemEl);
       });
+    }
 
-      taskItemEl.prepend(checkbox);
-      taskListEl.appendChild(taskItemEl);
-    });
 
     if (doneTasks.length > 0) {
       collapsibleHeaderEl.style.display = 'block';
@@ -91,7 +115,9 @@ export function TaskListContainer(): HTMLElement {
         checkbox.type = 'checkbox';
         checkbox.className = 'task-checkbox';
         checkbox.checked = true;
-        checkbox.addEventListener('click', () => {
+
+        checkbox.addEventListener('click', (e) => {
+          e.stopPropagation();
           task.status = 'To do';
           taskService.updateTask(task.id, task);
           useAppState.getState().triggerUpdate();
