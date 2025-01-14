@@ -23,8 +23,6 @@ export function Modal(): HTMLElement {
   modalEl.appendChild(confirmBtnEl);
   modalEl.appendChild(cancelBtnEl);
 
-
-
   const hideModal = () => {
     const { isModalOpen, modalMode } = useAppState.getState();
     if (isModalOpen || modalMode !== null) {
@@ -35,19 +33,17 @@ export function Modal(): HTMLElement {
 
   const handleConfirm = () => {
     const { modalMode, activeTaskId, activeProjectId } = useAppState.getState();
-    console.log('Modal Confirm Clicked:', { modalMode, activeTaskId, activeProjectId });
 
     if (modalMode === 'task-deletion' && activeTaskId) {
       taskService.deleteTask(activeTaskId);
-      console.log('Deleting task with ID:', activeTaskId);
       storeTasksToLocal(taskService.getAllTasks());
     } else if (modalMode === 'project-deletion' && activeProjectId && activeProjectId !== 1) {
       taskService.deleteAllTasksInProject(activeProjectId);
       projectService.deleteProject(activeProjectId);
-      console.log('Deleting project with ID:', activeProjectId);
-      storeProjectsToLocal(projectService.projects)
+      useAppState.getState().setActiveProjectId(1);
+      storeProjectsToLocal(projectService.projects);
     }
-    console.log("Triggering state update: modal confirmation");
+
     useAppState.getState().triggerUpdate();
     hideModal();
   };
@@ -61,8 +57,6 @@ export function Modal(): HTMLElement {
 
   useAppState.getState().subscribeToStateChange(() => {
     const { isModalOpen, modalMode } = useAppState.getState();
-
-    console.log("Subscription triggering rerender: filters");
 
     if (isModalOpen) {
       if (modalMode === 'task-deletion') {
