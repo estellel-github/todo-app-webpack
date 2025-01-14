@@ -30,7 +30,6 @@ export function FilterContainer(): HTMLElement {
       numTasksEl.textContent = taskCount.toString();
 
       filterItemEl.addEventListener('click', () => {
-        useAppState.getState().setActiveProjectId(null);
         useAppState.getState().setFilter(filter);
         useAppState.getState().setViewType('filter');
         useAppState.getState().triggerUpdate();
