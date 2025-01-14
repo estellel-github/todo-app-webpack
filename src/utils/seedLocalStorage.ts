@@ -1,11 +1,9 @@
 import { storeProjectsToLocal, storeTasksToLocal } from "../services/LocalStorage"
 import { Project } from '../types/ProjectTypes';
 import { Task } from "../types/TaskTypes";
-import { Priority, Status } from "../types/AppTypes"
 
-// Seed projects
 const seedProjects = [
-  { id: 1, name: "🏠 Inbox" }, // Default project
+  { id: 1, name: "🏠 Inbox" },
   { id: 2, name: "Work" },
   { id: 3, name: "Personal" },
   { id: 4, name: "Shopping List" },
@@ -21,13 +19,11 @@ const seedTasks = [
   { id: 106, projectId: 4, status: "To do", title: "Buy groceries", dueDate: new Date(), priority: "High", notes: "Milk, eggs, bread" },
 ] as const;
 
-// Seed local storage
+
 export function seedLocalStorage() {
-  // Convert seed data to appropriate types
   const projects = seedProjects.map((p) => new Project(p));
   const tasks = seedTasks.map((t) => new Task(t));
 
-  // Store projects and tasks in local storage
   storeProjectsToLocal(projects);
   storeTasksToLocal(tasks);
 
