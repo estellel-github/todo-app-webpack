@@ -1,4 +1,4 @@
-import { createElement } from '../utils/domUtils';
+import { createElement, clearContent } from '../utils/domUtils';
 import { useAppState } from '../state/AppState';
 import { taskService } from '../services/TaskService';
 import { projectService } from '../services/ProjectService';
@@ -9,14 +9,14 @@ export function ProjectContainer(): HTMLElement {
   projectContainerEl.id = 'project-container';
 
   const renderProjects = () => {
-    projectContainerEl.innerHTML = '';
+    clearContent(projectContainerEl);
 
     const projects = projectService.projects;
 
     projects.forEach((project) => {
       const projectItemEl = createElement('div', 'project-item', '');
       const projectInfoEl = createElement('div', 'project-info', '');
-      const projectNameEl = createElement('div', 'project-name', project.name);
+      const projectNameEl = project.id !== 1 ? createElement('div', 'project-name', `📁 ${project.name}`) : createElement('div', 'project-name', project.name);
 
       projectInfoEl.id = `project-info-${project.id}`;
       projectItemEl.id = `project-item-${project.id}`;
@@ -36,7 +36,6 @@ export function ProjectContainer(): HTMLElement {
 
       if (project.id !== 1) {
         const projectOptionsEl = ProjectOptions(project);
-        console.log(projectOptionsEl);
         projectItemEl.appendChild(projectOptionsEl);
       }
 
