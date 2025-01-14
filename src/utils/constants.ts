@@ -7,6 +7,8 @@ export const MESSAGES = {
   EMPTY_NAME_MSG: "⚠️ Please enter a project name",
 };
 
+export const APP_NAME: string = "☑️ To Do";
+
 export const MODAL_BUTTONS = {
   CONFIRM: 'Confirm',
   CANCEL: 'Cancel',
