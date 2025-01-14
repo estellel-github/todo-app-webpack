@@ -5,10 +5,9 @@ import {
   retrieveLocalTasks,
   retrieveLocalProjects,
 } from "../services/LocalStorage";
-import { seedLocalStorage } from "../utils/seedLocalStorage"
+// import { seedLocalStorage } from "../utils/seedLocalStorage"
 import { ProjectDetails, TaskDetails } from '../types/AppTypes';
 import { INBOX_ID } from "../utils/constants";
-
 
 // seedLocalStorage();
 
