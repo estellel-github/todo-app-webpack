@@ -3,7 +3,7 @@ export const INBOX_NAME = 'Inbox';
 
 export const MESSAGES = {
   DELETE_TASK_CONFIRM: '⚠️ Are you sure you want to delete this task?',
-  DELETE_PROJECT_CONFIRM: '⚠️ This project and all its tasks will be deleted permanently.',
+  DELETE_PROJECT_CONFIRM: '⚠️ This project and all its tasks will be deleted permanently. Are you sure?',
   EMPTY_PROJECT_MSG: 'ℹ️ This project has no pending tasks. Go touch some grass!',
   EMPTY_NAME_MSG: "⚠️ Please enter a project name",
 };
