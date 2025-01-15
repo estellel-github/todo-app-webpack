@@ -210,7 +210,10 @@ footer {
 
 /* Task List Container */
 .task-list-container {
-    background-color: var(--input-bg-color);
+    background-image: url('../public/dot-grid.webp');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 100%;
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
@@ -335,7 +338,7 @@ textarea::placeholder {
 .task-list {
     display: flex;
     flex-direction: column;
-    gap: var(--padding-large);
+    gap: var(--gap);
 }
 
 .task-top,
@@ -345,14 +348,27 @@ textarea::placeholder {
 }
 
 .task-item {
+    background: var(--secondary-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    cursor: pointer;
     display: flex;
     gap: var(--padding-small);
+    padding: var(--padding-small);
+}
+
+.task-item:hover {
+    background: var(--hover-bg-color);
 }
 
 .task-item.done {
     color: var(--done-task-color);
     margin: var(--padding-xsmall) 0 var(--padding-small) 0;
     text-decoration: line-through;
+}
+
+.task-item.done:hover {
+    background: var(--secondary-color);
 }
 
 /* Modal */
