@@ -19,9 +19,9 @@ export function ProjectOptions(project: Project): HTMLElement {
   projectNameInputEl.value = project.name;
   inputContainer.appendChild(projectNameInputEl);
 
-  const editBtn = createElement('button', 'edit-btn', BUTTONS_TXT.EDIT_ICON);
-  const saveBtn = createElement('button', 'save-btn display-none', BUTTONS_TXT.SAVE_ICON);
-  const deleteBtn = createElement('button', 'delete-btn', BUTTONS_TXT.DELETE_ICON);
+  const editBtn = createElement('button', 'edit-icon', BUTTONS_TXT.EDIT_ICON);
+  const saveBtn = createElement('button', 'save-icon display-none', BUTTONS_TXT.SAVE_ICON);
+  const deleteBtn = createElement('button', 'delete-icon', BUTTONS_TXT.DELETE_ICON);
 
   const enterEditMode = () => {
     isEditing = true;

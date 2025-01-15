@@ -35,7 +35,7 @@ export function TaskPane(): HTMLElement {
   const cancelTaskButtonEl = createElement('button', 'cancel-task-btn', BUTTONS_TXT.CANCEL);
   cancelTaskButtonEl.id = 'cancel-task-btn';
 
-  const deleteTaskButtonEl = createElement('button', 'delete-task-btn', BUTTONS_TXT.DELETE);
+  const deleteTaskButtonEl = createElement('button', 'delete-btn', BUTTONS_TXT.DELETE);
   deleteTaskButtonEl.id = 'delete-task-btn';
   deleteTaskButtonEl.style.display = 'none';
 
