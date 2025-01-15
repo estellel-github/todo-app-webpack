@@ -357,6 +357,18 @@ textarea::placeholder {
 
 /* Modal */
 
+.modal-overlay {
+    background: rgb(0 0 0 / 50%);
+    height: 100%;
+    left: 0;
+    pointer-events: all;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 999;
+
+}
+
 .modal {
     background-color: var(--input-bg-color);
     border-radius: var(--border-radius);
@@ -384,4 +396,6 @@ textarea::placeholder {
 .blurred {
     filter: blur(2px);
     pointer-events: none;
+    user-select: none;
+    z-index: 1;
 }

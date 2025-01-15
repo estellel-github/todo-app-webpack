@@ -1,4 +1,4 @@
-import { createElement } from '../utils/domUtils';
+import { createElement, safeQuerySelector } from '../utils/domUtils';
 import { useAppState } from '../state/AppState';
 import { taskService } from '../services/TaskService';
 import { projectService } from '../services/ProjectService';
@@ -6,9 +6,8 @@ import { storeProjectsToLocal, storeTasksToLocal } from '../services/LocalStorag
 import { MESSAGES, BUTTONS_TXT } from '../utils/constants';
 
 export function Modal(): HTMLElement {
-  const modalEl = createElement('div', 'modal', '');
-  modalEl.id = 'modal';
-  modalEl.style.display = 'none';
+  const modalOverlayEl = safeQuerySelector('#modal-overlay');
+  const modalEl = safeQuerySelector('#modal');
 
   const modalMsgEl = createElement('div', 'modal-msg', '');
   modalMsgEl.id = 'modal-msg';
@@ -23,10 +22,14 @@ export function Modal(): HTMLElement {
   modalEl.appendChild(confirmBtnEl);
   modalEl.appendChild(cancelBtnEl);
 
+  const taskPaneEl = safeQuerySelector("#task-pane");
+
   const hideModal = () => {
     const { isModalOpen, modalMode } = useAppState.getState();
     if (isModalOpen || modalMode !== null) {
-      modalEl.style.display = 'none';
+      modalOverlayEl?.classList.add('display-none');
+      modalEl?.classList.add('display-none');
+      taskPaneEl.classList.add('display-none');
       useAppState.getState().toggleModal(false, null);
     }
   };
@@ -37,13 +40,14 @@ export function Modal(): HTMLElement {
     if (modalMode === 'task-deletion' && activeTaskId) {
       taskService.deleteTask(activeTaskId);
       storeTasksToLocal(taskService.getAllTasks());
+      taskPaneEl.style.display = 'none';
     } else if (modalMode === 'project-deletion' && activeProjectId && activeProjectId !== 1) {
       taskService.deleteAllTasksInProject(activeProjectId);
       projectService.deleteProject(activeProjectId);
       useAppState.getState().setActiveProjectId(1);
       storeProjectsToLocal(projectService.projects);
     }
-
+    useAppState.getState().toggleTaskPane(false, null);
     useAppState.getState().triggerUpdate();
     hideModal();
   };
@@ -64,7 +68,8 @@ export function Modal(): HTMLElement {
       } else if (modalMode === 'project-deletion') {
         modalMsgEl.textContent = MESSAGES.DELETE_PROJECT_CONFIRM;
       }
-      modalEl.style.display = 'block';
+      modalOverlayEl?.classList.remove('display-none');
+      modalEl?.classList.remove('display-none');
     } else {
       hideModal();
     }

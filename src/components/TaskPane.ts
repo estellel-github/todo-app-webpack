@@ -119,7 +119,8 @@ export function TaskPane(): HTMLElement {
   };
 
   const handleClickOutside = (event: MouseEvent) => {
-    if (!taskPaneEl.contains(event.target as Node) && taskPaneEl.style.display === 'block') {
+    let isModalOpen = useAppState.getState().isModalOpen;
+    if (!taskPaneEl.contains(event.target as Node) && taskPaneEl.style.display === 'block' && !isModalOpen) {
       hideTaskPane();
     }
     safeQuerySelector('#task-list-container').classList.remove("blurred");
@@ -140,7 +141,9 @@ export function TaskPane(): HTMLElement {
   document.addEventListener('mousedown', handleClickOutside);
 
   useAppState.getState().subscribeToStateChange(() => {
-    if (useAppState.getState().isTaskPaneOpen === true) {
+    const { isTaskPaneOpen } = useAppState.getState();
+
+    if (isTaskPaneOpen) {
       populateTaskPane();
       safeQuerySelector('#task-list-container').classList.add("blurred");
     }
