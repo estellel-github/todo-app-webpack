@@ -21,6 +21,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: "./src/template.html",
+      favicon: "./src/public/favicon.png",
     }),
     new webpack.DefinePlugin({
       "process.env.SUPABASE_URL": JSON.stringify(process.env.SUPABASE_URL),
