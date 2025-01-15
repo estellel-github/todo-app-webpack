@@ -80,7 +80,7 @@ export function TaskListContainer(): HTMLElement {
         const taskNameEl = createElement('div', 'task-name', task.title);
         taskItemEl.id = `task-name-${task.id}`;
 
-        taskNameEl.addEventListener('click', (e) => {
+        taskItemEl.addEventListener('click', (e) => {
           e.stopPropagation();
           useAppState.getState().toggleTaskPane(true, task.id);
           useAppState.getState().triggerUpdate();
