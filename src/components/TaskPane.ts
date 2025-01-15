@@ -120,6 +120,11 @@ export function TaskPane(): HTMLElement {
 
   const handleClickOutside = (event: MouseEvent) => {
     let isModalOpen = useAppState.getState().isModalOpen;
+
+    if (taskPaneEl.contains(event.target as Node)) {
+      return;
+    }
+
     if (!taskPaneEl.contains(event.target as Node) && taskPaneEl.style.display === 'block' && !isModalOpen) {
       hideTaskPane();
     }
