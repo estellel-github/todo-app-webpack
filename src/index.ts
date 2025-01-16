@@ -15,9 +15,9 @@ function initializeApp() {
   const mainEl = safeQuerySelector('#main');
   const headerEl = safeQuerySelector('#header');
   const mainModuleEl = safeQuerySelector('#main-module');
-  const modalEl = safeQuerySelector('#modal');
+  const modalOverlayEl = safeQuerySelector('#modal-overlay');
 
-  if (!headerEl || !mainModuleEl || !modalEl || !mainEl) {
+  if (!headerEl || !mainModuleEl || !modalOverlayEl || !mainEl) {
     console.error('Missing required root elements in template.html');
     return;
   }
@@ -35,7 +35,7 @@ function initializeApp() {
   mainModuleEl.appendChild(taskPane);
 
   const modal = Modal();
-  modalEl.appendChild(modal);
+  modalOverlayEl.appendChild(modal);
 
   console.log('App initialized. Check sidebar and basic layout!');
 }
