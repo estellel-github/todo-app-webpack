@@ -25,8 +25,8 @@ export function ProjectOptions(project: Project): HTMLElement {
 
   const enterEditMode = () => {
     isEditing = true;
-    const projectNameEl = safeQuerySelector(`project-name-${project.id}`);
-    const projectInfoEl = safeQuerySelector(`project-info-${project.id}`);
+    const projectNameEl = safeQuerySelector(`#project-name-${project.id}`);
+    const projectInfoEl = safeQuerySelector(`#project-info-${project.id}`);
 
     if (projectNameEl && projectInfoEl) {
       projectNameEl.style.display = 'none';
@@ -47,7 +47,7 @@ export function ProjectOptions(project: Project): HTMLElement {
 
   const exitEditMode = () => {
     isEditing = false;
-    const projectNameEl = safeQuerySelector(`project-name-${project.id}`);
+    const projectNameEl = safeQuerySelector(`#project-name-${project.id}`);
 
     if (projectNameEl) {
       projectNameEl.style.display = 'block';
